@@ -12,7 +12,7 @@ class MushroomStrain extends Model
 
     protected $fillable = [
         'code',
-        'name',
+        //'name',
         'scientific_name',
         'type',
         'supplier',
