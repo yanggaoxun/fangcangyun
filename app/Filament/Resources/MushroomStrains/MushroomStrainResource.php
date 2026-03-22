@@ -120,11 +120,10 @@ class MushroomStrainResource extends Resource
                     ->minValue(0)
                     ->maxValue(14),
 
-                // 基地库存配置（仅创建时显示）
+                // 基地库存配置
                 Repeater::make('base_stocks')
                     ->label('基地库存配置')
-                    ->helperText('为每个基地配置初始库存数量')
-                    ->hiddenOn('edit')
+                    ->helperText('为每个基地配置库存数量')
                     ->schema([
                         Select::make('base_id')
                             ->label('基地')
