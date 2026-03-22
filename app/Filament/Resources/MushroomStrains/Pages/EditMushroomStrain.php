@@ -29,10 +29,9 @@ class EditMushroomStrain extends EditRecord
 
         // 加载现有的基地库存数据
         $strain = $this->getRecord();
-        $baseStocks = $strain->baseStocks()->with('base')->get();
+        $baseStocks = $strain->baseStocks()->get(['base_id', 'stock_quantity']);
 
         $this->form->fill([
-            ...$this->form->getState(),
             'base_stocks' => $baseStocks->map(function ($stock) {
                 return [
                     'base_id' => $stock->base_id,

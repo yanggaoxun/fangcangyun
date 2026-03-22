@@ -70,7 +70,7 @@ class EnvironmentDataTable
 
                 TextColumn::make('recorded_at')
                     ->label('记录时间')
-                    ->dateTime('Y-m-d H:i:s')
+                    ->dateTime('Y年 n月j日 H:i:s')
                     ->sortable(),
 
                 TextColumn::make('notes')
@@ -91,11 +91,9 @@ class EnvironmentDataTable
                     ->label('记录时间')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('from')
-                            ->label('开始日期')
-                            ->format('Y年 n月j日'),
+                            ->label('开始日期'),
                         \Filament\Forms\Components\DatePicker::make('to')
-                            ->label('结束日期')
-                            ->format('Y年 n月j日'),
+                            ->label('结束日期'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query

@@ -40,10 +40,10 @@ class BatchProgressWidget extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('inoculation_date')
                     ->label('接种日期')
-                    ->dateTime('Y-m-d'),
+                    ->dateTime('Y年 n月j日'),
                 Tables\Columns\TextColumn::make('expected_harvest_date')
                     ->label('预计收获')
-                    ->dateTime('Y-m-d'),
+                    ->dateTime('Y年 n月j日'),
             ])
             ->paginated(false);
     }

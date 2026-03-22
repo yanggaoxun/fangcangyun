@@ -44,17 +44,17 @@ class BatchesTable
 
                 TextColumn::make('inoculation_date')
                     ->label('接种时间')
-                    ->dateTime('Y-m-d H:i:s')
+                    ->dateTime('Y年 n月j日 H:i')
                     ->sortable(),
 
                 TextColumn::make('expected_harvest_date')
                     ->label('预计采收时间')
-                    ->dateTime('Y-m-d H:i:s')
+                    ->dateTime('Y年 n月j日 H:i')
                     ->sortable(),
 
                 TextColumn::make('actual_harvest_date')
                     ->label('实际采收时间')
-                    ->dateTime('Y-m-d H:i:s')
+                    ->dateTime('Y年 n月j日 H:i')
                     ->sortable(),
 
                 TextColumn::make('expected_yield')

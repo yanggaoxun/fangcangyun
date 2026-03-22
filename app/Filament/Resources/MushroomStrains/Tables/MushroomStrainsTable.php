@@ -27,19 +27,13 @@ class MushroomStrainsTable
                         'other' => '其他',
                     }),
 
-                \Filament\Tables\Columns\TextColumn::make('base_stocks_list')
-                    ->label('基地库存')
+                \Filament\Tables\Columns\TextColumn::make('total_stock')
+                    ->label('总库存')
                     ->getStateUsing(function ($record) {
-                        $stocks = $record->baseStocks->load('base');
-                        if ($stocks->isEmpty()) {
-                            return '无库存';
-                        }
+                        $total = $record->baseStocks()->sum('stock_quantity');
 
-                        return $stocks->map(function ($stock) {
-                            return "{$stock->base->name}: {$stock->stock_quantity} {$stock->strain->unit}";
-                        })->implode(', ');
-                    })
-                    ->wrap(),
+                        return $total.' '.$record->unit;
+                    }),
 
                 \Filament\Tables\Columns\TextColumn::make('temp_range')
                     ->label('温度范围 (°C)')

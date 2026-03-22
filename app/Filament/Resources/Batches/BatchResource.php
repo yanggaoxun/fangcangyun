@@ -191,7 +191,6 @@ class BatchResource extends Resource
                     ->native(false)
                     ->disabledOn('edit')
                     ->live()
-                    ->format('Y年 n月j日 H:i')
                     ->afterStateUpdated(function ($set, $get, $state) {
                         if ($state) {
                             $strainId = $get('strain_id');
@@ -209,14 +208,12 @@ class BatchResource extends Resource
                 Forms\Components\DateTimePicker::make('expected_harvest_date')
                     ->label('预计采收日期时间')
                     ->native(false)
-                    ->format('Y年 n月j日 H:i')
                     ->helperText('根据菌种成长周期自动计算，也可手动调整'),
 
                 // 实际采收日期时间
                 Forms\Components\DateTimePicker::make('actual_harvest_date')
                     ->label('实际采收日期时间')
                     ->native(false)
-                    ->format('Y年 n月j日 H:i')
                     ->default(fn () => now())
                     ->hiddenOn('create'),
 
