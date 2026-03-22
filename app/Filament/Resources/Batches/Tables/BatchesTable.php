@@ -27,8 +27,14 @@ class BatchesTable
                     ->label('方舱')
                     ->searchable(),
 
-                TextColumn::make('strain.name')
+                TextColumn::make('strain.type')
                     ->label('菌种')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'oyster' => '平菇',
+                        'shiitake' => '香菇',
+                        'enoki' => '金针菇',
+                        'other' => '其他',
+                    })
                     ->searchable(),
 
                 TextColumn::make('strain_quantity')

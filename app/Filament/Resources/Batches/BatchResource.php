@@ -123,12 +123,23 @@ class BatchResource extends Resource
                         }
 
                         // 只显示该基地有库存的活跃菌种
-                        return MushroomStrain::where('is_active', true)
+                        $strains = MushroomStrain::where('is_active', true)
                             ->whereHas('baseStocks', function ($query) use ($baseId) {
                                 $query->where('base_id', $baseId)
                                     ->whereRaw('stock_quantity - reserved_quantity > 0');
                             })
-                            ->pluck('name', 'id');
+                            ->get();
+
+                        $typeNames = [
+                            'oyster' => '平菇',
+                            'shiitake' => '香菇',
+                            'enoki' => '金针菇',
+                            'other' => '其他',
+                        ];
+
+                        return $strains->mapWithKeys(function ($strain) use ($typeNames) {
+                            return [$strain->id => $typeNames[$strain->type] ?? $strain->type];
+                        });
                     })
                     ->searchable()
                     ->live()
