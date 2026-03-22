@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('mushroom_strains', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->string('name');
+            //$table->string('name');
             $table->string('scientific_name')->nullable();
             $table->enum('type', ['oyster', 'shiitake', 'enoki', 'other']);
             $table->string('supplier')->nullable();
