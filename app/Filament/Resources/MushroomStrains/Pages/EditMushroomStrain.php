@@ -10,10 +10,16 @@ class EditMushroomStrain extends EditRecord
 {
     protected static string $resource = MushroomStrainResource::class;
 
+    public function getTitle(): string
+    {
+        return '编辑菌种';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('删除'),
         ];
     }
 }

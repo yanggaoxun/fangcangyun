@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Devices;
 use App\Filament\Resources\Devices\Pages\CreateDevice;
 use App\Filament\Resources\Devices\Pages\EditDevice;
 use App\Filament\Resources\Devices\Pages\ListDevices;
-use App\Filament\Resources\Devices\Schemas\DeviceForm;
 use App\Filament\Resources\Devices\Tables\DevicesTable;
 use App\Models\Device;
 use BackedEnum;
@@ -41,6 +40,15 @@ class DeviceResource extends Resource
                     ->label('设备名称')
                     ->required()
                     ->maxLength(255),
+
+                \Filament\Forms\Components\Select::make('chamber_id')
+                    ->label('所属方舱')
+                    ->options(function () {
+                        return Chamber::where('status', '!=', 'maintenance')
+                            ->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->placeholder('选择方舱（可选）'),
 
                 \Filament\Forms\Components\Select::make('type')
                     ->label('设备类型')

@@ -10,10 +10,16 @@ class EditDevice extends EditRecord
 {
     protected static string $resource = DeviceResource::class;
 
+    public function getTitle(): string
+    {
+        return '编辑设备';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('删除'),
         ];
     }
 }

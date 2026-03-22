@@ -19,12 +19,15 @@ class AlertsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->label('编辑'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                    DeleteBulkAction::make()
+                        ->label('删除选中'),
+                ])
+                    ->label('批量操作'),
             ]);
     }
 }

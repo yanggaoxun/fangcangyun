@@ -10,10 +10,16 @@ class EditChamber extends EditRecord
 {
     protected static string $resource = ChamberResource::class;
 
+    public function getTitle(): string
+    {
+        return '编辑方舱';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->label('删除'),
         ];
     }
 }

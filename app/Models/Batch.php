@@ -17,19 +17,17 @@ class Batch extends Model
         'inoculation_date',
         'expected_harvest_date',
         'actual_harvest_date',
-        'stage',
-        'substrate_quantity',
+        'strain_quantity',
         'expected_yield',
         'actual_yield',
-        'status',
         'notes',
     ];
 
     protected $casts = [
-        'inoculation_date' => 'date',
-        'expected_harvest_date' => 'date',
-        'actual_harvest_date' => 'date',
-        'substrate_quantity' => 'integer',
+        'inoculation_date' => 'datetime',
+        'expected_harvest_date' => 'datetime',
+        'actual_harvest_date' => 'datetime',
+        'strain_quantity' => 'integer',
         'expected_yield' => 'decimal:2',
         'actual_yield' => 'decimal:2',
     ];
@@ -49,6 +47,7 @@ class Batch extends Model
         if ($this->expected_yield > 0) {
             return round(($this->actual_yield / $this->expected_yield) * 100, 2);
         }
+
         return null;
     }
 
@@ -62,17 +61,17 @@ class Batch extends Model
         if ($this->expected_harvest_date) {
             return now()->diffInDays($this->expected_harvest_date, false);
         }
+
         return null;
     }
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->whereNull('actual_harvest_date');
     }
 
     public function scopeHarvested($query)
     {
-        return $query->where('status', 'completed')
-            ->whereNotNull('actual_harvest_date');
+        return $query->whereNotNull('actual_harvest_date');
     }
 }

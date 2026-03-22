@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Chamber extends Model
@@ -13,24 +14,15 @@ class Chamber extends Model
     protected $fillable = [
         'code',
         'name',
-        'location',
+        'base_id',
         'capacity',
-        'type',
         'status',
         'description',
         'images',
-        'target_temperature',
-        'target_humidity',
-        'target_co2',
-        'target_ph',
     ];
 
     protected $casts = [
         'images' => 'array',
-        'target_temperature' => 'decimal:2',
-        'target_humidity' => 'decimal:2',
-        'target_co2' => 'decimal:2',
-        'target_ph' => 'decimal:2',
     ];
 
     public function batches(): HasMany
@@ -51,6 +43,11 @@ class Chamber extends Model
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
+    }
+
+    public function base(): BelongsTo
+    {
+        return $this->belongsTo(Base::class);
     }
 
     public function getCurrentBatchAttribute()
