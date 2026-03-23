@@ -27,6 +27,8 @@ class RoleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
 
+    protected static ?string $slug = 'system-roles';
+
     public static function form(Schema $schema): Schema
     {
         return $schema
