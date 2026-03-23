@@ -112,7 +112,27 @@ class BatchResource extends Resource
                     ->dehydrated()
                     ->hiddenOn('create'),
 
-                // 选择菌种 - 根据基地筛选有库存的菌种
+                // 选择菌种 - 编辑时显示为只读文本
+                Forms\Components\TextInput::make('strain_name')
+                    ->label('菌种')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->visibleOn('edit')
+                    ->formatStateUsing(function ($record) {
+                        if (! $record?->strain) {
+                            return '';
+                        }
+                        $typeNames = [
+                            'oyster' => '平菇',
+                            'shiitake' => '香菇',
+                            'enoki' => '金针菇',
+                            'other' => '其他',
+                        ];
+
+                        return $typeNames[$record->strain->type] ?? $record->strain->type;
+                    }),
+
+                // 选择菌种 - 根据基地筛选有库存的菌种（创建时使用）
                 Forms\Components\Select::make('strain_id')
                     ->label('菌种')
                     ->required()
@@ -143,6 +163,7 @@ class BatchResource extends Resource
                     })
                     ->searchable()
                     ->live()
+                    ->hiddenOn('edit')
                     ->afterStateUpdated(function ($set, $get, $state) {
                         if ($state) {
                             $strain = MushroomStrain::find($state);

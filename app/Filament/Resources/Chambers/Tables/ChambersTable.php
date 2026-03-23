@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Chambers\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -28,13 +29,18 @@ class ChambersTable
                 TextColumn::make('capacity')
                     ->label('容量')
                     ->suffix(' 袋'),
-                TextColumn::make('status')
+                BadgeColumn::make('status')
                     ->label('状态')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'idle' => '空闲',
                         'planting' => '种植中',
                         'maintenance' => '维护中',
-                    }),
+                    })
+                    ->colors([
+                        'success' => 'planting',
+                        'warning' => 'maintenance',
+                        'primary' => 'idle',
+                    ]),
                 TextColumn::make('created_at')
                     ->label('创建时间')
                     ->dateTime('Y-m-d H:i:s')

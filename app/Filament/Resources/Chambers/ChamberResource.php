@@ -14,7 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rule;
 
 class ChamberResource extends Resource
 {
@@ -47,30 +46,26 @@ class ChamberResource extends Resource
                     ->label('方舱编号')
                     ->required()
                     ->maxLength(50)
-                    ->rules([
-                        function ($record) {
-                            return Rule::unique('chambers', 'code')
-                                ->where('base_id', fn ($input) => $input['base_id'])
-                                ->ignore($record?->id);
-                        },
-                    ])
+                    ->unique(
+                        table: 'chambers',
+                        column: 'code',
+                        ignoreRecord: true,
+                    )
                     ->validationMessages([
-                        'unique' => '该基地已存在相同编号的方舱',
+                        'unique' => '该方舱编号已存在',
                     ]),
 
                 Forms\Components\TextInput::make('name')
                     ->label('方舱名称')
                     ->required()
                     ->maxLength(255)
-                    ->rules([
-                        function ($record) {
-                            return Rule::unique('chambers', 'name')
-                                ->where('base_id', fn ($input) => $input['base_id'])
-                                ->ignore($record?->id);
-                        },
-                    ])
+                    ->unique(
+                        table: 'chambers',
+                        column: 'name',
+                        ignoreRecord: true,
+                    )
                     ->validationMessages([
-                        'unique' => '该基地已存在相同名称的方舱',
+                        'unique' => '该方舱名称已存在',
                     ]),
 
                 Forms\Components\TextInput::make('capacity')
