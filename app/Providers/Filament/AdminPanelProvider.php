@@ -72,6 +72,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('个人设置')
                     ->icon('heroicon-o-user')
                     ->url(fn () => Profile::getUrl()),
+            ])
+            ->assets([
+                \Filament\Support\Assets\Css::make('custom', __DIR__.'/../../../resources/css/filament/admin/custom.css'),
             ]);
     }
 }

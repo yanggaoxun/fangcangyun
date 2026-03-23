@@ -1,0 +1,28 @@
+.fi-wi-stats-overview {
+    .grid > div {
+        &:nth-child(1) {
+            background-color: #f0fdf4 !important;
+            border-left: 4px solid #22c55e !important;
+        }
+        &:nth-child(2) {
+            background-color: #eff6ff !important;
+            border-left: 4px solid #3b82f6 !important;
+        }
+        &:nth-child(3) {
+            background-color: #ecfeff !important;
+            border-left: 4px solid #06b6d4 !important;
+        }
+        &:nth-child(4) {
+            background-color: #eef2ff !important;
+            border-left: 4px solid #6366f1 !important;
+        }
+        &:nth-child(5) {
+            background-color: #fffbeb !important;
+            border-left: 4px solid #f59e0b !important;
+        }
+        &:nth-child(6) {
+            background-color: #fff1f2 !important;
+            border-left: 4px solid #f43f5e !important;
+        }
+    }
+}
