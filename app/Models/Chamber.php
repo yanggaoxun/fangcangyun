@@ -13,6 +13,7 @@ class Chamber extends Model
 
     protected $fillable = [
         'code',
+        'device_code',
         'name',
         'base_id',
         'capacity',

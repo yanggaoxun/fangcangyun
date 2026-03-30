@@ -73,7 +73,7 @@ class DashboardStatsWidget extends BaseWidget
                 ->description($baseInactiveCount > 0
                     ? "✓ {$baseActiveCount} 正常 | ✗ {$baseInactiveCount} 停用"
                     : "✓ {$baseActiveCount} 个正常运营")
-                ->descriptionIcon('heroicon-m-building-office-2')
+                ->descriptionIcon('heroicon-m-home')
                 ->color($baseInactiveCount > 0 ? 'warning' : 'success')
                 ->chart([$baseActiveCount, $baseInactiveCount])
                 ->extraAttributes([
@@ -82,7 +82,7 @@ class DashboardStatsWidget extends BaseWidget
 
             Stat::make('方舱利用率', $chamberUtilizationRate.'%')
                 ->description("🌱 {$chamberPlantingCount} 种植 | ⏸️ {$chamberIdleCount} 空闲 | 🔧 {$chamberMaintenanceCount} 维护")
-                ->descriptionIcon('heroicon-m-rectangle-group')
+                ->descriptionIcon('heroicon-m-square-3-stack-3d')
                 ->color($chamberUtilizationRate >= 70 ? 'success' : ($chamberUtilizationRate >= 40 ? 'warning' : 'info'))
                 ->chart([$chamberPlantingCount, $chamberIdleCount, $chamberMaintenanceCount])
                 ->extraAttributes([
@@ -93,7 +93,7 @@ class DashboardStatsWidget extends BaseWidget
                 ->description($todayNewBatches > 0
                     ? "📈 今日新增 {$todayNewBatches} 个"
                     : ($batchTrend > 0 ? "📊 较昨日 +{$batchTrend}" : '📋 今日无新增'))
-                ->descriptionIcon('heroicon-m-queue-list')
+                ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->color('info')
                 ->chart([$todayNewBatches, max(0, $yesterdayNewBatches)])
                 ->extraAttributes([
@@ -102,7 +102,7 @@ class DashboardStatsWidget extends BaseWidget
 
             Stat::make('设备在线率', $deviceOnlineRate.'%')
                 ->description("✓ {$deviceActiveCount} 在线".($deviceErrorCount > 0 ? " | ✗ {$deviceErrorCount} 故障" : ' | 运行正常'))
-                ->descriptionIcon('heroicon-m-signal')
+                ->descriptionIcon('heroicon-m-wifi')
                 ->color($deviceOnlineRate >= 90 ? 'success' : ($deviceOnlineRate >= 70 ? 'warning' : 'danger'))
                 ->chart([$deviceActiveCount, $deviceCount - $deviceActiveCount])
                 ->extraAttributes([
@@ -113,7 +113,7 @@ class DashboardStatsWidget extends BaseWidget
                 ->description($criticalAlerts > 0
                     ? "🔴 {$criticalAlerts} 严重 | 🟡 {$warningAlerts} 警告"
                     : ($unacknowledgedAlerts > 0 ? "🟡 {$unacknowledgedAlerts} 个待处理" : '✅ 系统运行正常'))
-                ->descriptionIcon('heroicon-m-bell-alert')
+                ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($criticalAlerts > 0 ? 'danger' : ($unacknowledgedAlerts > 0 ? 'warning' : 'success'))
                 ->chart([$criticalAlerts, $warningAlerts])
                 ->extraAttributes([
@@ -124,7 +124,7 @@ class DashboardStatsWidget extends BaseWidget
                 ->description($yieldTrend > 0
                     ? '📈 较昨日 +'.number_format($yieldTrend, 2).' kg (+'.($yieldTrendPercent > 0 ? $yieldTrendPercent : 0).'%)'
                     : ($yieldTrend < 0 ? '📉 较昨日 '.number_format($yieldTrend, 2).' kg ('.($yieldTrendPercent < 0 ? $yieldTrendPercent : 0).'%)' : '➡️ 与昨日持平'))
-                ->descriptionIcon('heroicon-m-scale')
+                ->descriptionIcon('heroicon-m-chart-bar')
                 ->color($yieldTrend >= 0 ? 'success' : 'warning')
                 ->chart([$todayYield, $yesterdayYield])
                 ->extraAttributes([

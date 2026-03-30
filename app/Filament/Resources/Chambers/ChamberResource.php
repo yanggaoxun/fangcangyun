@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Chambers;
 
+use App\Filament\Resources\Chambers\Pages\ChamberMonitoring;
 use App\Filament\Resources\Chambers\Pages\CreateChamber;
 use App\Filament\Resources\Chambers\Pages\EditChamber;
 use App\Filament\Resources\Chambers\Pages\ListChambers;
@@ -14,19 +15,17 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ChamberResource extends Resource
 {
     protected static ?string $model = Chamber::class;
 
-    protected static ?string $navigationLabel = '方舱列表';
+    protected static ?string $navigationLabel = '方舱管理';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    public static function getNavigationGroup(): ?string
-    {
-        return '方舱管理';
-    }
+    protected static string|UnitEnum|null $navigationGroup = '方舱管理';
 
     public static function form(Schema $schema): Schema
     {
@@ -53,6 +52,19 @@ class ChamberResource extends Resource
                     )
                     ->validationMessages([
                         'unique' => '该方舱编号已存在',
+                    ]),
+
+                Forms\Components\TextInput::make('device_code')
+                    ->label('边缘设备编码')
+                    ->helperText('用于远程控制设备关联和数据传输识别')
+                    ->maxLength(100)
+                    ->unique(
+                        table: 'chambers',
+                        column: 'device_code',
+                        ignoreRecord: true,
+                    )
+                    ->validationMessages([
+                        'unique' => '该设备编码已被使用',
                     ]),
 
                 Forms\Components\TextInput::make('name')
@@ -109,6 +121,25 @@ class ChamberResource extends Resource
             'index' => ListChambers::route('/'),
             'create' => CreateChamber::route('/create'),
             'edit' => EditChamber::route('/{record}/edit'),
+            'monitoring' => ChamberMonitoring::route('/monitoring'),
+        ];
+    }
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            \Filament\Navigation\NavigationItem::make('方舱列表')
+                ->icon('heroicon-o-rectangle-stack')
+                ->url(static::getUrl())
+                ->sort(2)
+                ->group('方舱管理')
+                ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.chambers.index')),
+            \Filament\Navigation\NavigationItem::make('方舱监控')
+                ->icon('heroicon-o-chart-bar')
+                ->url(static::getUrl('monitoring'))
+                ->sort(3)
+                ->group('方舱管理')
+                ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.chambers.monitoring')),
         ];
     }
 }

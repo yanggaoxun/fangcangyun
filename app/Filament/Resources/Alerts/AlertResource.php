@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Alerts;
 use App\Filament\Resources\Alerts\Pages\CreateAlert;
 use App\Filament\Resources\Alerts\Pages\EditAlert;
 use App\Filament\Resources\Alerts\Pages\ListAlerts;
-use App\Filament\Resources\Alerts\Schemas\AlertForm;
 use App\Filament\Resources\Alerts\Tables\AlertsTable;
 use App\Models\Alert;
 use BackedEnum;
@@ -20,7 +19,7 @@ class AlertResource extends Resource
 
     protected static ?string $navigationLabel = '报警管理';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBellAlert;
 
     public static function getNavigationGroup(): ?string
     {

@@ -19,7 +19,7 @@ class DeviceResource extends Resource
 
     protected static ?string $navigationLabel = '设备管理';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCpuChip;
 
     public static function getNavigationGroup(): ?string
     {

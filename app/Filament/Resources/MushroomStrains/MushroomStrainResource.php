@@ -23,7 +23,7 @@ class MushroomStrainResource extends Resource
 
     protected static ?string $navigationLabel = '菌种管理';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBeaker;
 
     public static function getNavigationGroup(): ?string
     {

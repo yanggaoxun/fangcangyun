@@ -37,7 +37,6 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 '方舱管理',
                 '菌菇管理',
-                '环境监控',
                 '设备管理',
                 '系统管理',
             ])

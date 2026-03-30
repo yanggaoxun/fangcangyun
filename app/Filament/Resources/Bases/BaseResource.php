@@ -60,7 +60,6 @@ class BaseResource extends Resource
                     ->options([
                         'active' => '正常运营',
                         'inactive' => '暂停使用',
-                        'maintenance' => '维护中',
                     ])
                     ->default('active')
                     ->required()
@@ -71,15 +70,14 @@ class BaseResource extends Resource
                                 return;
                             }
 
-                            // 检查是否从 active 改为 inactive 或 maintenance
-                            if ($record->status === 'active' && in_array($value, ['inactive', 'maintenance'])) {
+                            // 检查是否从 active 改为 inactive
+                            if ($record->status === 'active' && $value === 'inactive') {
                                 $plantingChambers = $record->chambers()
                                     ->where('status', 'planting')
                                     ->count();
 
                                 if ($plantingChambers > 0) {
-                                    $statusText = $value === 'inactive' ? '暂停使用' : '维护中';
-                                    $fail("该基地下有 {$plantingChambers} 个方舱处于种植中状态，无法修改为{$statusText}");
+                                    $fail("该基地下有 {$plantingChambers} 个方舱处于种植中状态，无法修改为暂停使用");
                                 }
                             }
                         },
@@ -109,12 +107,10 @@ class BaseResource extends Resource
                     ->colors([
                         'success' => 'active',
                         'danger' => 'inactive',
-                        'warning' => 'maintenance',
                     ])
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'active' => '正常运营',
                         'inactive' => '暂停使用',
-                        'maintenance' => '维护中',
                     }),
                 TextColumn::make('created_at')
                     ->label('创建时间')
@@ -128,7 +124,6 @@ class BaseResource extends Resource
                     ->options([
                         'active' => '正常运营',
                         'inactive' => '暂停使用',
-                        'maintenance' => '维护中',
                     ]),
             ])
             ->recordActions([
@@ -161,5 +156,10 @@ class BaseResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return '方舱管理';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
     }
 }
