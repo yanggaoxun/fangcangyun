@@ -4,14 +4,6 @@
         saving: false,
         error: null,
         activeTab: 'temperature',
-        notification: { show: false, message: '', type: 'success' },
-        
-        showNotification(message, type = 'success') {
-            this.notification = { show: true, message, type };
-            setTimeout(() => {
-                this.notification.show = false;
-            }, 3000);
-        },
         deviceCode: '{{ $deviceCode }}',
         configs: {
             temperature: { 
@@ -289,7 +281,13 @@
                     throw error;
                 }
                 
-                this.showNotification('配置保存成功', 'success');
+                // 使用 Filament 原生通知
+                new FilamentNotification()
+                    .title('操作成功')
+                    .success()
+                    .body('配置已保存')
+                    .send();
+                
             } catch (err) {
                 this.error = err.message;
                 let errorMsg = err.message;
@@ -298,7 +296,13 @@
                         return `${field}: ${msgs.join(', ')}`;
                     }).join('; ');
                 }
-                this.showNotification('保存失败: ' + errorMsg, 'error');
+                
+                // 使用 Filament 原生通知
+                new FilamentNotification()
+                    .title('操作失败')
+                    .danger()
+                    .body(errorMsg)
+                    .send();
                 console.error('保存配置失败:', err);
             } finally {
                 this.saving = false;
@@ -306,36 +310,6 @@
         }
      }"
      x-init="init()">
-    
-    {{-- Notification Toast - 更明显的样式 --}}
-    <div 
-        x-show="notification.show"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate-y-[-20px] scale-95"
-        x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
-        x-transition:leave-end="opacity-0 transform translate-y-[-20px] scale-95"
-        style="position: fixed; top: 24px; right: 24px; z-index: 99999; min-width: 320px; max-width: 480px;"
-        x-cloak>
-        <div 
-            :style="notification.type === 'success' 
-                ? 'background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); border-color: #22c55e;' 
-                : 'background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-color: #ef4444;'"
-            style="padding: 20px 28px; border-radius: 12px; color: white; font-weight: 700; font-size: 16px; 
-                   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1); 
-                   border: 3px solid; display: flex; align-items: center; gap: 14px;">
-            <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <svg x-show="notification.type === 'success'" style="width: 22px; height: 22px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <svg x-show="notification.type === 'error'" style="width: 22px; height: 22px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </div>
-            <span x-text="notification.message" style="text-shadow: 0 1px 2px rgba(0,0,0,0.2);"></span>
-        </div>
-    </div>
     
     {{-- Loading State --}}
     <div x-show="loading" style="text-align: center; padding: 40px;">

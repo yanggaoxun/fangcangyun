@@ -2,6 +2,35 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## UI/UX 规范
+
+### 保存操作通知规范
+所有保存操作必须使用 Filament 原生通知系统，确保用户体验一致：
+
+**成功提示：**
+```javascript
+new FilamentNotification()
+    .title('操作成功')
+    .success()
+    .body('配置已保存')
+    .send();
+```
+
+**失败提示：**
+```javascript
+new FilamentNotification()
+    .title('操作失败')
+    .danger()
+    .body(errorMessage)
+    .send();
+```
+
+**注意事项：**
+- 使用 `FilamentNotification` 类（挂载在 window 对象上）
+- 成功使用 `.success()` 方法，失败使用 `.danger()` 方法
+- 标题和正文都要提供，确保信息完整
+- 通知会自动显示在页面右上角，与手动控制页面的提示风格一致
+
 ## Project Overview
 
 This is a Laravel 12 application with Filament 4.0 admin panel, containerized with Docker for managing mushroom cultivation chambers automation.
