@@ -87,6 +87,12 @@ class Permission extends Model
             ['name' => 'alerts.create', 'label' => '创建报警', 'group' => '报警管理'],
             ['name' => 'alerts.edit', 'label' => '编辑报警', 'group' => '报警管理'],
             ['name' => 'alerts.delete', 'label' => '删除报警', 'group' => '报警管理'],
+
+            // 自动控制管理
+            ['name' => 'auto_control.view', 'label' => '查看自动控制配置', 'group' => '自动控制管理'],
+            ['name' => 'auto_control.config', 'label' => '配置自动控制', 'group' => '自动控制管理'],
+            ['name' => 'auto_control.manual', 'label' => '手动控制设备', 'group' => '自动控制管理'],
+            ['name' => 'auto_control.logs', 'label' => '查看控制日志', 'group' => '自动控制管理'],
         ];
     }
 

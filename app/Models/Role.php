@@ -110,6 +110,7 @@ class Role extends Model
             'devices.view', 'devices.edit',
             'environment.view',
             'alerts.view', 'alerts.edit',
+            'auto_control.view', 'auto_control.config', 'auto_control.manual', 'auto_control.logs',
         ];
         $baseAdmin->syncPermissions($baseAdminPermissions);
     }

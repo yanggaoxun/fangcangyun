@@ -54,24 +54,56 @@
 - 批次创建成功后自动扣减对应基地的菌种库存
 - 库存不足时禁止创建批次并提示错误
 
-### 4. 环境监控模块
-**功能描述**：实时监控方舱内环境参数
+### 4. 环境监控与设备控制模块
+**功能描述**：实时监控方舱内环境参数和设备状态，支持远程设备控制
 
 **已实现功能**：
-- API数据接收：方舱通过API上传环境数据（温度、湿度、CO2、pH、光照、土壤湿度）
-- 只读数据展示：Filament后台只读显示环境数据，不允许手动修改
-- 数据筛选功能：按基地、方舱、时间范围、异常状态筛选
-- 异常标记：支持标记异常数据
-- 历史数据记录：支持按时间范围查询
+- **环境数据监控**：
+  - API数据接收：方舱通过API上传环境数据（温度、湿度、CO2、光照）
+  - 只读数据展示：Filament后台只读显示环境数据
+  - 数据筛选：按基地、方舱、时间范围、异常状态筛选
+  - 异常标记：支持标记异常数据
+
+- **设备状态管理**（2025-03-30更新）：
+  - 设备状态字段整合到环境数据表
+  - 9个设备开关状态实时监控：内循环、制冷、制热、风机、四通阀、新风、加湿、补光、照明
+  - 后台可视化设备控制面板（3列布局）
+  - 实时开关切换功能
+
+- **设备控制API**：
+  - 获取设备状态接口
+  - 更新设备状态接口
+  - 单设备控制接口
+  - 批量设备控制接口
 
 **数据库表结构**：
-- `environment_data` 表：存储环境数据
-- 字段：chamber_id（方舱ID）、temperature（温度）、humidity（湿度）、co2_level（CO2浓度）、ph_level（pH值）、light_intensity（光照强度）、soil_moisture（土壤湿度）、recorded_at（记录时间）、is_anomaly（是否异常）
+- `chamber_environment_data` 表：存储环境数据和设备状态（宽表设计）
+- **环境参数字段**：temperature（温度）、humidity（湿度）、co2_level（CO2浓度）、light_intensity（光照强度）、recorded_at（记录时间）、is_anomaly（是否异常）
+- **设备状态字段**（9个布尔值）：
+  - inner_circulation（内循环）、cooling（制冷）、heating（制热）
+  - fan（风机）、four_way_valve（四通阀）、fresh_air（新风）
+  - humidification（加湿）、lighting_supplement（补光）、lighting（照明）
+
+**方舱监控页面**：
+- 头部信息栏：基地/方舱名称、更新时间、在线状态
+- 实时环境数据卡片（4列）：温度、湿度、CO2浓度、光照强度
+- 设备开关控制面板（3×3网格）：9个设备独立控制卡片
+  - 每个设备卡片：图标、名称、状态文本、开关按钮
+  - 开关动画效果：滑块式切换，绿色开启/灰色关闭
+  - 实时反馈：操作后立即更新数据库并显示成功通知
 
 **API接口**：
-- `POST /api/v1/environment-data` - 单条数据上传
-- `POST /api/v1/environment-data/batch` - 批量数据上传
-- 参数：chamber_code, temperature, humidity, co2_level, ph_level, light_intensity, soil_moisture, recorded_at, is_anomaly, notes
+- **环境数据接口**：
+  - `POST /api/v1/environment-data` - 单条数据上传
+  - `POST /api/v1/environment-data/batch` - 批量数据上传
+  - 参数：chamber_code, temperature, humidity, co2_level, light_intensity, recorded_at, is_anomaly, notes
+  - 设备状态字段：inner_circulation, cooling, heating, fan, four_way_valve, fresh_air, humidification, lighting_supplement, lighting
+
+- **设备控制接口**：
+  - `GET /api/v1/chambers/{deviceCode}/devices` - 获取设备状态
+  - `POST /api/v1/chambers/{deviceCode}/devices` - 更新设备状态
+  - `POST /api/v1/chambers/{deviceCode}/devices/control` - 控制单个设备
+  - `POST /api/v1/chambers/{deviceCode}/devices/control-batch` - 批量控制设备
 
 ### 5. 设备控制模块
 **功能描述**：管理方舱内的自动化设备
@@ -125,11 +157,14 @@
 
 ## 数据流转流程
 
-### 环境数据流
-1. 方舱设备通过API定期上传环境数据
-2. 系统接收并存储到environment_data表
-3. 后台管理界面只读显示环境数据
-4. 支持按基地、方舱、时间筛选查看
+### 环境数据与设备控制流
+1. 方舱设备通过API定期上传环境数据（含9个设备状态）
+2. 系统接收并存储到chamber_environment_data表
+3. 后台管理界面显示：
+   - 实时环境数据（只读）
+   - 设备状态可视化面板（可控制）
+4. 用户在后台点击设备开关 → 更新数据库 → （待实现）下发指令到边缘服务器
+5. 支持按基地、方舱、时间筛选查看
 
 ### 菌种库存流
 1. 管理员在菌种管理中添加菌种，配置各基地初始库存
@@ -142,6 +177,26 @@
 2. 选择菌种 → 显示该基地库存提示
 3. 输入数量 → 系统验证库存是否充足
 4. 提交创建 → 扣减库存、更新方舱状态为"种植中"
+
+## 数据库设计
+
+### 核心数据表
+- `bases` 表：存储基地信息
+- `base_strain_stocks` 表：存储各基地的菌种库存
+- `chambers` 表：存储方舱信息
+- `mushroom_strains` 表：存储菌种信息
+- `batches` 表：存储菌包批次信息
+- `chamber_environment_data` 表：存储环境数据和设备状态（宽表设计）
+- `devices` 表：存储设备信息
+- `alerts` 表：存储告警信息
+- `users/roles/permissions` 表：用户权限管理
+
+### 关键设计变更（2025-03-30）
+**环境数据表重构**：
+- 表名从 `environment_data` 改为 `chamber_environment_data`
+- 采用宽表设计，一条记录包含完整的环境参数 + 9个设备状态
+- 便于查询最新状态：按 recorded_at 倒序取第一条
+- 删除独立的 `chamber_device_statuses` 表，简化数据模型
 
 ## 部署架构
 
@@ -183,12 +238,17 @@
 - [x] 方舱状态自动更新
 - [x] 自动计算预计采收日期
 
-### ✅ 环境监控
-- [x] API接收环境数据
+### ✅ 环境监控与设备控制
+- [x] API接收环境数据（温度、湿度、CO2、光照）
 - [x] 批量数据上传
-- [x] Filament只读展示
+- [x] Filament只读展示环境数据
 - [x] 多维度筛选（基地、方舱、时间、异常）
 - [x] 异常标记功能
+- [x] **设备状态整合到环境数据表**（9个设备状态字段）
+- [x] **方舱监控页面可视化设备控制面板**
+- [x] **9个设备独立开关控制**（内循环、制冷、制热、风机、四通阀、新风、加湿、补光、照明）
+- [x] **设备控制API接口**（查询、更新、单控、批控）
+- [x] **实时开关状态同步**
 
 ### ✅ 设备管理
 - [x] 设备CRUD操作
@@ -216,6 +276,26 @@
 8. **云端部署**：支持云服务器部署
 9. **环境数据图表**：可视化展示环境参数变化趋势
 10. **库存预警**：菌种库存低于阈值时自动提醒
+
+## 更新历史
+
+### 2025-03-30 设备控制功能升级
+- **数据库重构**：将设备状态从独立表 `chamber_device_statuses` 迁移到 `chamber_environment_data` 表
+- **新增功能**：
+  - 方舱监控页面可视化设备控制面板
+  - 9个设备独立开关控制（内循环、制冷、制热、风机、四通阀、新风、加湿、补光、照明）
+  - 设备控制API接口（查询、更新、单控、批控）
+- **界面优化**：
+  - 3×3网格布局的设备控制面板
+  - 滑块式开关动画效果
+  - 实时状态同步和通知反馈
+- **API扩展**：新增 `/api/v1/chambers/{deviceCode}/devices/*` 系列接口
+
+### 2025-03-21 系统基础功能完成
+- 完成基地、方舱、菌种、批次、设备、告警等核心模块
+- 实现库存管理和批次创建逻辑
+- 完成环境数据接收API
+- 部署Docker容器化环境
 
 ## 当前状态
 ✅ **已完成**：所有核心功能模块已实现，系统可正常运行

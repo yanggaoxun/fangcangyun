@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ChamberAutoControlController;
 use App\Http\Controllers\Api\ChamberDeviceController;
 use App\Http\Controllers\Api\EnvironmentDataController;
 use Illuminate\Support\Facades\Route;
@@ -44,5 +45,35 @@ Route::prefix('v1')->group(function () {
         // Control multiple devices
         Route::post('/{deviceCode}/devices/control-batch', [ChamberDeviceController::class, 'controlMultiple'])
             ->name('api.chamber.devices.control-batch');
+
+        // Auto control endpoints
+        Route::prefix('{deviceCode}/auto-control')->group(function () {
+            // Get configuration
+            Route::get('/', [ChamberAutoControlController::class, 'getConfig'])
+                ->name('api.chamber.auto-control.config');
+
+            // Update configuration
+            Route::put('/{controlType}', [ChamberAutoControlController::class, 'updateConfig'])
+                ->name('api.chamber.auto-control.update');
+
+            // Manual control device
+            Route::post('/{controlType}/control', [ChamberAutoControlController::class, 'manualControl'])
+                ->name('api.chamber.auto-control.manual');
+
+            // Get device status
+            Route::get('/status', [ChamberAutoControlController::class, 'getDeviceStatus'])
+                ->name('api.chamber.auto-control.status');
+
+            // Get control logs
+            Route::get('/logs', [ChamberAutoControlController::class, 'getLogs'])
+                ->name('api.chamber.auto-control.logs');
+
+            // Schedule management
+            Route::get('/{controlType}/schedules', [ChamberAutoControlController::class, 'getSchedules'])
+                ->name('api.chamber.auto-control.schedules');
+
+            Route::put('/{controlType}/schedules/{scheduleIndex}', [ChamberAutoControlController::class, 'updateSchedule'])
+                ->name('api.chamber.auto-control.schedule.update');
+        });
     });
 });

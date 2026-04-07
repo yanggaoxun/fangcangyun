@@ -1,0 +1,207 @@
+        {{-- Tab Navigation - 优化版本 --}}
+        <div style="margin-bottom: 28px;">
+            <div style="display: flex; gap: 12px; justify-content: space-between;">
+                {{-- 温度控制 Tab --}}
+                <div 
+                    @click="activeTab = 'temperature'"
+                    style="flex: 1; padding: 16px 12px; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; min-width: 140px;"
+                    :style="activeTab === 'temperature' 
+                        ? 'background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%); border: 2px solid #f97316; box-shadow: 0 8px 25px -5px rgba(249, 115, 22, 0.4), 0 4px 10px -2px rgba(249, 115, 22, 0.2); transform: translateY(-3px);' 
+                        : 'background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'"
+                    @mouseenter="if (activeTab !== 'temperature') { $event.currentTarget.style.transform = 'translateY(-2px)'; $event.currentTarget.style.boxShadow = '0 6px 20px -4px rgba(0,0,0,0.1)'; $event.currentTarget.style.borderColor = '#fed7aa'; }"
+                    @mouseleave="if (activeTab !== 'temperature') { $event.currentTarget.style.transform = 'translateY(0)'; $event.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; $event.currentTarget.style.borderColor = '#e2e8f0'; }">
+                    
+                    {{-- 图标容器 --}}
+                    <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.3s ease;"
+                         :style="activeTab === 'temperature' 
+                            ? 'background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35); transform: scale(1.1);' 
+                            : 'background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);'">
+                        🌡️
+                    </div>
+                    
+                    {{-- 文字内容 --}}
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.3s ease;"
+                             :style="activeTab === 'temperature' ? 'color: #c2410c;' : 'color: #475569;'">
+                            温度控制
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; transition: all 0.3s ease;"
+                             :style="configs.temperature.is_enabled 
+                                ? (activeTab === 'temperature' 
+                                    ? 'background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color: #14532d; box-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);' 
+                                    : 'background: #dcfce7; color: #15803d;')
+                                : (activeTab === 'temperature' 
+                                    ? 'background: rgba(255,255,255,0.6); color: #9a3412;' 
+                                    : 'background: #f1f5f9; color: #94a3b8;')"
+                             x-text="configs.temperature.is_enabled ? '● 已启用' : '● 未启用'">
+                        </div>
+                    </div>
+                    
+                    {{-- 激活指示器 --}}
+                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(50%); width: 40px; height: 4px; border-radius: 2px; transition: all 0.3s ease;"
+                         :style="activeTab === 'temperature' 
+                            ? 'background: linear-gradient(90deg, #f97316 0%, #ea580c 100%); opacity: 1;' 
+                            : 'opacity: 0;'"></div>
+                </div>
+
+                {{-- 加湿控制 Tab --}}
+                <div 
+                    @click="activeTab = 'humidification'"
+                    style="flex: 1; padding: 16px 12px; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; min-width: 140px;"
+                    :style="activeTab === 'humidification' 
+                        ? 'background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #3b82f6; box-shadow: 0 8px 25px -5px rgba(59, 130, 246, 0.4), 0 4px 10px -2px rgba(59, 130, 246, 0.2); transform: translateY(-3px);' 
+                        : 'background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'"
+                    @mouseenter="if (activeTab !== 'humidification') { $event.currentTarget.style.transform = 'translateY(-2px)'; $event.currentTarget.style.boxShadow = '0 6px 20px -4px rgba(0,0,0,0.1)'; $event.currentTarget.style.borderColor = '#bfdbfe'; }"
+                    @mouseleave="if (activeTab !== 'humidification') { $event.currentTarget.style.transform = 'translateY(0)'; $event.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; $event.currentTarget.style.borderColor = '#e2e8f0'; }">
+                    
+                    <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.3s ease;"
+                         :style="activeTab === 'humidification' 
+                            ? 'background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35); transform: scale(1.1);' 
+                            : 'background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);'">
+                        💧
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.3s ease;"
+                             :style="activeTab === 'humidification' ? 'color: #1e40af;' : 'color: #475569;'">
+                            加湿控制
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; transition: all 0.3s ease;"
+                             :style="configs.humidification.is_enabled 
+                                ? (activeTab === 'humidification' 
+                                    ? 'background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color: #14532d; box-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);' 
+                                    : 'background: #dcfce7; color: #15803d;')
+                                : (activeTab === 'humidification' 
+                                    ? 'background: rgba(255,255,255,0.6); color: #1e40af;' 
+                                    : 'background: #f1f5f9; color: #94a3b8;')"
+                             x-text="configs.humidification.is_enabled ? '● 已启用' : '● 未启用'">
+                        </div>
+                    </div>
+                    
+                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(50%); width: 40px; height: 4px; border-radius: 2px; transition: all 0.3s ease;"
+                         :style="activeTab === 'humidification' 
+                            ? 'background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); opacity: 1;' 
+                            : 'opacity: 0;'"></div>
+                </div>
+
+                {{-- 新风控制 Tab --}}
+                <div 
+                    @click="activeTab = 'fresh_air'"
+                    style="flex: 1; padding: 16px 12px; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; min-width: 140px;"
+                    :style="activeTab === 'fresh_air' 
+                        ? 'background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #22c55e; box-shadow: 0 8px 25px -5px rgba(34, 197, 94, 0.4), 0 4px 10px -2px rgba(34, 197, 94, 0.2); transform: translateY(-3px);' 
+                        : 'background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'"
+                    @mouseenter="if (activeTab !== 'fresh_air') { $event.currentTarget.style.transform = 'translateY(-2px)'; $event.currentTarget.style.boxShadow = '0 6px 20px -4px rgba(0,0,0,0.1)'; $event.currentTarget.style.borderColor = '#bbf7d0'; }"
+                    @mouseleave="if (activeTab !== 'fresh_air') { $event.currentTarget.style.transform = 'translateY(0)'; $event.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; $event.currentTarget.style.borderColor = '#e2e8f0'; }">
+                    
+                    <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.3s ease;"
+                         :style="activeTab === 'fresh_air' 
+                            ? 'background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35); transform: scale(1.1);' 
+                            : 'background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);'">
+                        🌬️
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.3s ease;"
+                             :style="activeTab === 'fresh_air' ? 'color: #15803d;' : 'color: #475569;'">
+                            新风控制
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; transition: all 0.3s ease;"
+                             :style="configs.fresh_air.is_enabled 
+                                ? (activeTab === 'fresh_air' 
+                                    ? 'background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color: #14532d; box-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);' 
+                                    : 'background: #dcfce7; color: #15803d;')
+                                : (activeTab === 'fresh_air' 
+                                    ? 'background: rgba(255,255,255,0.6); color: #15803d;' 
+                                    : 'background: #f1f5f9; color: #94a3b8;')"
+                             x-text="configs.fresh_air.is_enabled ? '● 已启用' : '● 未启用'">
+                        </div>
+                    </div>
+                    
+                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(50%); width: 40px; height: 4px; border-radius: 2px; transition: all 0.3s ease;"
+                         :style="activeTab === 'fresh_air' 
+                            ? 'background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%); opacity: 1;' 
+                            : 'opacity: 0;'"></div>
+                </div>
+
+                {{-- 排风控制 Tab --}}
+                <div 
+                    @click="activeTab = 'exhaust'"
+                    style="flex: 1; padding: 16px 12px; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; min-width: 140px;"
+                    :style="activeTab === 'exhaust' 
+                        ? 'background: linear-gradient(145deg, #faf5ff 0%, #f3e8ff 100%); border: 2px solid #a855f7; box-shadow: 0 8px 25px -5px rgba(168, 85, 247, 0.4), 0 4px 10px -2px rgba(168, 85, 247, 0.2); transform: translateY(-3px);' 
+                        : 'background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'"
+                    @mouseenter="if (activeTab !== 'exhaust') { $event.currentTarget.style.transform = 'translateY(-2px)'; $event.currentTarget.style.boxShadow = '0 6px 20px -4px rgba(0,0,0,0.1)'; $event.currentTarget.style.borderColor = '#e9d5ff'; }"
+                    @mouseleave="if (activeTab !== 'exhaust') { $event.currentTarget.style.transform = 'translateY(0)'; $event.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; $event.currentTarget.style.borderColor = '#e2e8f0'; }">
+                    
+                    <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.3s ease;"
+                         :style="activeTab === 'exhaust' 
+                            ? 'background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35); transform: scale(1.1);' 
+                            : 'background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);'">
+                        💨
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.3s ease;"
+                             :style="activeTab === 'exhaust' ? 'color: #7c3aed;' : 'color: #475569;'">
+                            排风控制
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; transition: all 0.3s ease;"
+                             :style="configs.exhaust.is_enabled 
+                                ? (activeTab === 'exhaust' 
+                                    ? 'background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color: #14532d; box-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);' 
+                                    : 'background: #dcfce7; color: #15803d;')
+                                : (activeTab === 'exhaust' 
+                                    ? 'background: rgba(255,255,255,0.6); color: #7c3aed;' 
+                                    : 'background: #f1f5f9; color: #94a3b8;')"
+                             x-text="configs.exhaust.is_enabled ? '● 已启用' : '● 未启用'">
+                        </div>
+                    </div>
+                    
+                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(50%); width: 40px; height: 4px; border-radius: 2px; transition: all 0.3s ease;"
+                         :style="activeTab === 'exhaust' 
+                            ? 'background: linear-gradient(90deg, #a855f7 0%, #9333ea 100%); opacity: 1;' 
+                            : 'opacity: 0;'"></div>
+                </div>
+
+                {{-- 光照控制 Tab --}}
+                <div 
+                    @click="activeTab = 'lighting'"
+                    style="flex: 1; padding: 16px 12px; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; min-width: 140px;"
+                    :style="activeTab === 'lighting' 
+                        ? 'background: linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; box-shadow: 0 8px 25px -5px rgba(245, 158, 11, 0.4), 0 4px 10px -2px rgba(245, 158, 11, 0.2); transform: translateY(-3px);' 
+                        : 'background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'"
+                    @mouseenter="if (activeTab !== 'lighting') { $event.currentTarget.style.transform = 'translateY(-2px)'; $event.currentTarget.style.boxShadow = '0 6px 20px -4px rgba(0,0,0,0.1)'; $event.currentTarget.style.borderColor = '#fde68a'; }"
+                    @mouseleave="if (activeTab !== 'lighting') { $event.currentTarget.style.transform = 'translateY(0)'; $event.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; $event.currentTarget.style.borderColor = '#e2e8f0'; }">
+                    
+                    <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.3s ease;"
+                         :style="activeTab === 'lighting' 
+                            ? 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35); transform: scale(1.1);' 
+                            : 'background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);'">
+                        ☀️
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.3s ease;"
+                             :style="activeTab === 'lighting' ? 'color: #b45309;' : 'color: #475569;'">
+                            光照控制
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; transition: all 0.3s ease;"
+                             :style="configs.lighting.is_enabled 
+                                ? (activeTab === 'lighting' 
+                                    ? 'background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color: #14532d; box-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);' 
+                                    : 'background: #dcfce7; color: #15803d;')
+                                : (activeTab === 'lighting' 
+                                    ? 'background: rgba(255,255,255,0.6); color: #b45309;' 
+                                    : 'background: #f1f5f9; color: #94a3b8;')"
+                             x-text="configs.lighting.is_enabled ? '● 已启用' : '● 未启用'">
+                        </div>
+                    </div>
+                    
+                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(50%); width: 40px; height: 4px; border-radius: 2px; transition: all 0.3s ease;"
+                         :style="activeTab === 'lighting' 
+                            ? 'background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); opacity: 1;' 
+                            : 'opacity: 0;'"></div>
+                </div>
+            </div>
+        </div>

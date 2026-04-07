@@ -137,13 +137,25 @@ class ChamberMonitoring extends Page implements HasTable
             ->defaultSort('recorded_at', 'desc')
             ->actions([
                 Action::make('device_control')
-                    ->label('设备控制')
+                    ->label('手动控制')
                     ->icon('heroicon-o-cog')
                     ->color('primary')
-                    ->modalHeading('设备控制')
+                    ->modalHeading('手动控制')
                     ->modalWidth('5xl')
                     ->modalContent(fn ($record) => view('filament.resources.chambers.pages.device-control-modal', [
                         'chamberId' => $record->chamber_id,
+                    ])),
+                Action::make('auto_control')
+                    ->label('自动控制')
+                    ->icon('heroicon-o-adjustments-horizontal')
+                    ->color('success')
+                    ->modalHeading('自动控制配置')
+                    ->modalWidth('7xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalContent(fn ($record) => view('filament.resources.chambers.pages.auto-control-modal', [
+                        'chamberId' => $record->chamber_id,
+                        'deviceCode' => $record->chamber->device_code,
                     ])),
             ])
             ->filters([
