@@ -70,6 +70,38 @@
   - 后台可视化设备控制面板（3列布局）
   - 实时开关切换功能
 
+- **自动控制功能**（2025-04-07更新）：
+  - **温度自动控制**：
+    - 多时段配置（最多5个时段，互斥启用）
+    - 时段参数：开始时间、结束时间、制冷上下限、制热上下限
+    - 循环延时配置：延时制冷/加热、延时停止循环、内循环运行/停止时长
+  
+  - **加湿自动控制**：
+    - 控制模式：阈值控制、循环控制、定时控制
+    - 内循环联动开关
+    - 时段配置：湿度上下限控制
+    - 循环参数：加湿运行/停止时长
+  
+  - **新风自动控制**：
+    - 控制模式：阈值控制（CO2浓度）、循环控制、定时控制
+    - 内循环联动、新风延迟启动、内循环延时启动
+    - 时段配置：CO2上下限控制
+  
+  - **排风自动控制**：
+    - 控制模式：阈值控制（CO2浓度）、循环控制、定时控制
+    - 新风联动开关、排风延迟启动、新风延迟启动
+    - 时段配置：CO2上下限控制
+  
+  - **光照自动控制**：
+    - 控制模式：循环控制、定时控制（无阈值和关闭模式）
+    - 循环参数：LED开启/关闭时长（支持分钟/小时单位）
+    - 时段配置：LED开启/关闭时长控制
+
+- **自动控制API**（2025-04-07更新）：
+  - `GET /api/auto-control/{deviceCode}` - 获取自动控制配置
+  - `PUT /api/auto-control/{deviceCode}/{controlType}` - 更新指定控制类型配置
+  - 支持5种控制类型：temperature、h、umidification、fresh_air、exhaust、lighting
+
 - **设备控制API**：
   - 获取设备状态接口
   - 更新设备状态接口
@@ -83,6 +115,19 @@
   - inner_circulation（内循环）、cooling（制冷）、heating（制热）
   - fan（风机）、four_way_valve（四通阀）、fresh_air（新风）
   - humidification（加湿）、lighting_supplement（补光）、lighting（照明）
+- `chamber_control_configs` 表（2025-04-07新增）：存储自动控制配置
+  - control_type：控制类型（temperature、h、umidification、fresh_air、exhaust、lighting）
+  - mode：控制模式（threshold、cycle、schedule、off、manual）
+  - is_enabled：是否启用
+  - threshold_upper/lower：阈值上下限
+  - cycle_run/stop_duration：循环运行/停止时长
+  - linkage_config：联动配置（JSON）
+  - 延时字段：delay_cooling_heating、delay_stop_cycle等
+- `chamber_schedules` 表（2025-04-07新增）：存储时段配置
+  - 关联control_configs，支持多时段配置
+  - 时段参数：start_time、end_time、各类阈值字段
+  - schedule_index：时段排序
+  - is_enabled：时段是否启用
 
 **方舱监控页面**：
 - 头部信息栏：基地/方舱名称、更新时间、在线状态
@@ -91,6 +136,18 @@
   - 每个设备卡片：图标、名称、状态文本、开关按钮
   - 开关动画效果：滑块式切换，绿色开启/灰色关闭
   - 实时反馈：操作后立即更新数据库并显示成功通知
+- **自动控制配置面板**（2025-04-07新增）：
+  - Tab导航：温度、加湿、新风、排风、光照5个控制类型
+  - 每个控制面板包含：
+    - 主开关：启用/禁用自动控制
+    - 控制模式选择（根据类型不同）
+    - 阈值/循环/时段配置表单
+    - 时段列表管理（最多5个时段，互斥启用）
+    - 保存按钮：使用Filament原生通知反馈结果
+  - 联动配置：新风/排风与内循环的联动开关
+  - 延时配置：各类延迟启动参数
+  - 时段配置：时间范围+环境参数阈值
+  - 响应式表单验证和错误提示
 
 **API接口**：
 - **环境数据接口**：
@@ -104,6 +161,12 @@
   - `POST /api/v1/chambers/{deviceCode}/devices` - 更新设备状态
   - `POST /api/v1/chambers/{deviceCode}/devices/control` - 控制单个设备
   - `POST /api/v1/chambers/{deviceCode}/devices/control-batch` - 批量控制设备
+
+- **自动控制接口**（2025-04-07新增）：
+  - `GET /api/auto-control/{deviceCode}` - 获取方舱自动控制配置
+  - `PUT /api/auto-control/{deviceCode}/{controlType}` - 更新指定控制类型配置
+  - controlType可选值：temperature、h、umidification、fresh_air、exhaust、lighting
+  - 支持配置项：mode、is_enabled、thresholds、cycle_params、linkage_config、delays、schedules
 
 ### 5. 设备控制模块
 **功能描述**：管理方舱内的自动化设备
@@ -147,6 +210,9 @@
 - **主题**：支持明暗主题切换
 - **响应式**：适配不同设备屏幕
 - **时间格式**：统一使用"Y年 n月j日 H:i"格式（如：2026年 3月21日 14:30）
+- **通知系统**：使用Filament原生通知（2025-04-07规范）
+  - 成功提示：`new FilamentNotification().title('操作成功').success().body('配置已保存').send()`
+  - 失败提示：`new FilamentNotification().title('操作失败').danger().body(errorMessage).send()`
 
 ### 系统特性
 - **多语言支持**：中英文切换
@@ -187,6 +253,8 @@
 - `mushroom_strains` 表：存储菌种信息
 - `batches` 表：存储菌包批次信息
 - `chamber_environment_data` 表：存储环境数据和设备状态（宽表设计）
+- `chamber_control_configs` 表（2025-04-07新增）：存储自动控制配置
+- `chamber_schedules` 表（2025-04-07新增）：存储时段配置
 - `devices` 表：存储设备信息
 - `alerts` 表：存储告警信息
 - `users/roles/permissions` 表：用户权限管理
@@ -197,6 +265,15 @@
 - 采用宽表设计，一条记录包含完整的环境参数 + 9个设备状态
 - 便于查询最新状态：按 recorded_at 倒序取第一条
 - 删除独立的 `chamber_device_statuses` 表，简化数据模型
+
+### 关键设计变更（2025-04-07）
+**自动控制功能实现**：
+- 新增 `chamber_control_configs` 表：存储5种控制类型的配置（温度、加湿、新风、排风、光照）
+- 新增 `chamber_schedules` 表：存储时段配置，支持多时段管理
+- 控制模式支持：阈值控制、循环控制、定时控制、关闭、手动
+- 时段互斥机制：同一控制类型下只有一个时段可启用
+- 数据流转：前端配置 → API验证 → 数据库更新 → 返回保存成功通知
+- 前端使用Filament原生通知：`new FilamentNotification().title().success().body().send()`
 
 ## 部署架构
 
@@ -249,6 +326,15 @@
 - [x] **9个设备独立开关控制**（内循环、制冷、制热、风机、四通阀、新风、加湿、补光、照明）
 - [x] **设备控制API接口**（查询、更新、单控、批控）
 - [x] **实时开关状态同步**
+- [x] **自动控制功能**（2025-04-07）
+  - [x] 温度自动控制（多时段、互斥启用、循环延时）
+  - [x] 加湿自动控制（阈值/循环/定时模式）
+  - [x] 新风自动控制（CO2阈值、循环、定时、联动）
+  - [x] 排风自动控制（CO2阈值、循环、定时、新风联动）
+  - [x] 光照自动控制（循环/定时模式、LED时长控制）
+- [x] **自动控制API接口**（获取配置、更新配置）
+- [x] **时段管理功能**（最多5个时段、互斥启用）
+- [x] **Filament原生通知**（保存成功/失败提示）
 
 ### ✅ 设备管理
 - [x] 设备CRUD操作
@@ -263,6 +349,10 @@
 - [x] 统一时间格式（Y年 n月j日 H:i）
 - [x] 响应式布局
 - [x] 表单验证和提示
+- [x] **Filament原生通知规范**（2025-04-07）
+  - [x] 保存操作使用 `new FilamentNotification()`
+  - [x] 成功提示：`.title('操作成功').success().body('配置已保存')`
+  - [x] 失败提示：`.title('操作失败').danger().body(errorMessage)`
 
 ## 后续可扩展功能
 
@@ -278,6 +368,26 @@
 10. **库存预警**：菌种库存低于阈值时自动提醒
 
 ## 更新历史
+
+### 2025-04-07 自动控制功能全面升级
+- **新增功能**：
+  - 温度自动控制：多时段配置（最多5个，互斥启用）、循环延时配置
+  - 加湿自动控制：支持阈值/循环/定时三种模式、内循环联动
+  - 新风自动控制：CO2阈值控制、内循环联动、延时启动配置
+  - 排风自动控制：CO2阈值控制、新风联动、双延时配置
+  - 光照自动控制：循环/定时模式、LED时长控制（分钟/小时）
+  - 自动控制API：`/api/auto-control/{deviceCode}` 获取配置，`/api/auto-control/{deviceCode}/{controlType}` 更新配置
+- **数据库变更**：
+  - 新增 `chamber_control_configs` 表：存储5种控制类型的配置
+  - 新增 `chamber_schedules` 表：存储多时段配置
+- **界面特性**：
+  - Tab导航式控制面板（温度、加湿、新风、排风、光照）
+  - 时段互斥启用机制（同一类型只有一个时段可启用）
+  - 联动开关配置（新风/排风与内循环的联动）
+  - 表单验证和错误提示
+- **开发规范**：
+  - 所有保存操作使用 Filament 原生通知
+  - 代码已更新至 CLAUDE.md 规范文档
 
 ### 2025-03-30 设备控制功能升级
 - **数据库重构**：将设备状态从独立表 `chamber_device_statuses` 迁移到 `chamber_environment_data` 表
@@ -304,6 +414,8 @@
 ✅ **基础功能**：CRUD操作、搜索筛选、状态管理
 ✅ **业务逻辑**：库存扣减、数据接收、状态流转
 ✅ **容器化**：Docker环境配置完成，支持一键启动
-✅ **API接口**：环境数据接收API已实现
+✅ **API接口**：环境数据接收API、设备控制API、自动控制API已实现
+✅ **自动控制**：5种控制类型（温度、加湿、新风、排风、光照）自动控制功能已实现
+✅ **开发规范**：保存操作通知规范已更新至 CLAUDE.md
 
 系统目前已具备投入使用的条件，可以开始录入基地、方舱、菌种等基础数据进行实际管理。
