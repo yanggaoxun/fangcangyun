@@ -2,10 +2,10 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\Profile;
-use App\Filament\Resources\Users\PermissionResource;
-use App\Filament\Resources\Users\RoleResource;
-use App\Filament\Resources\Users\UserResource;
+use App\Admin\Pages\Profile;
+use App\Admin\Resources\Users\PermissionResource;
+use App\Admin\Resources\Users\RoleResource;
+use App\Admin\Resources\Users\UserResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -41,17 +41,17 @@ class AdminPanelProvider extends PanelProvider
                 '系统管理',
             ])
             ->breadcrumbs(false)
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverResources(in: app_path('Admin/Resources'), for: 'App\Admin\Resources')
             ->resources([
                 UserResource::class,
                 RoleResource::class,
                 PermissionResource::class,
             ])
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverPages(in: app_path('Admin/Pages'), for: 'App\Admin\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->discoverWidgets(in: app_path('Admin/Widgets'), for: 'App\Admin\Widgets')
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

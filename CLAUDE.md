@@ -104,7 +104,7 @@ php artisan filament:upgrade
 - **DB Container**: MySQL 8.0, accessible at localhost:3307
 
 ### Key Directories
-- `app/Filament/`: Filament admin resources, pages, and widgets
+- `app/Admin/`: Filament admin resources, pages, and widgets
 - `app/Models/`: Eloquent models
 - `database/migrations/`: Database migrations
 - `config/`: Configuration files
@@ -114,7 +114,7 @@ php artisan filament:upgrade
 The application uses Filament as the admin panel framework:
 - Admin panel accessible at `/admin`
 - Panel provider: `app/Providers/Filament/AdminPanelProvider.php`
-- Resources auto-discovered from `app/Filament/Resources`
+- Resources auto-discovered from `app/Admin/Resources`
 - Default authentication with User model implementing `FilamentUser` interface
 
 ### Database Configuration
