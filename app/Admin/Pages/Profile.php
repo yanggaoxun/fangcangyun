@@ -2,7 +2,6 @@
 
 namespace App\Admin\Pages;
 
-use App\Models\User;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -90,7 +89,7 @@ class Profile extends Page implements HasForms
 
         // 检查邮箱是否已被其他用户使用
         if ($data['email'] !== $user->email) {
-            $existingUser = User::where('email', $data['email'])
+            $existingUser = SysUser::where('email', $data['email'])
                 ->where('id', '!=', $user->id)
                 ->first();
             if ($existingUser) {
@@ -111,7 +110,7 @@ class Profile extends Page implements HasForms
             $updateData['password'] = Hash::make($data['new_password']);
         }
 
-        User::where('id', $user->id)->update($updateData);
+        SysUser::where('id', $user->id)->update($updateData);
 
         // 重置密码字段
         $this->form->fill([

@@ -3,9 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Admin\Pages\Profile;
-use App\Admin\Resources\Users\PermissionResource;
-use App\Admin\Resources\Users\RoleResource;
-use App\Admin\Resources\Users\UserResource;
+use App\Admin\Resources\System\Users\PermissionResource;
+use App\Admin\Resources\System\Users\RoleResource;
+use App\Admin\Resources\System\Users\UserResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;

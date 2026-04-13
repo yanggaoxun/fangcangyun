@@ -10,6 +10,8 @@ class ChamberControlState extends Model
 {
     use HasFactory;
 
+    protected $table = 'chambers_control_states';
+
     protected $fillable = [
         'chamber_id',
         'control_type',

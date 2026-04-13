@@ -10,6 +10,8 @@ class ChamberSchedule extends Model
 {
     use HasFactory;
 
+    protected $table = 'chambers_schedules';
+
     protected $fillable = [
         'chamber_id',
         'control_type',

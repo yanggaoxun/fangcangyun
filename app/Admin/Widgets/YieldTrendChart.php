@@ -2,7 +2,7 @@
 
 namespace App\Admin\Widgets;
 
-use App\Models\Batch;
+use App\Models\MushroomBatch;
 use Filament\Widgets\ChartWidget;
 
 class YieldTrendChart extends ChartWidget
@@ -23,10 +23,10 @@ class YieldTrendChart extends ChartWidget
             $date = now()->subDays($i);
             $dates[] = $date->format('m-d');
 
-            $actualYields[] = Batch::whereDate('actual_harvest_date', $date)
+            $actualYields[] = MushroomBatch::whereDate('actual_harvest_date', $date)
                 ->sum('actual_yield') ?? 0;
 
-            $expectedYields[] = Batch::whereDate('expected_harvest_date', $date)
+            $expectedYields[] = MushroomBatch::whereDate('expected_harvest_date', $date)
                 ->sum('expected_yield') ?? 0;
         }
 

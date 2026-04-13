@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
-use App\Models\Role;
 use Illuminate\Database\Seeder;
 
 class AutoControlPermissionSeeder extends Seeder
@@ -21,12 +19,12 @@ class AutoControlPermissionSeeder extends Seeder
         ];
 
         foreach ($autoControlPermissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm['name']], $perm);
+            SysPermission::firstOrCreate(['name' => $perm['name']], $perm);
         }
         $this->command->info('自动控制权限已创建');
 
         // 2. 为角色分配自动控制权限
-        $autoControlPermissionIds = Permission::whereIn('name', [
+        $autoControlPermissionIds = SysPermission::whereIn('name', [
             'auto_control.view',
             'auto_control.config',
             'auto_control.manual',
@@ -34,21 +32,21 @@ class AutoControlPermissionSeeder extends Seeder
         ])->pluck('id')->toArray();
 
         // 为超级管理员分配所有自动控制权限
-        $superAdmin = Role::where('name', 'super_admin')->first();
+        $superAdmin = SysRole::where('name', 'super_admin')->first();
         if ($superAdmin) {
             $superAdmin->permissions()->syncWithoutDetaching($autoControlPermissionIds);
             $this->command->info('已为超级管理员分配自动控制权限');
         }
 
         // 为系统管理员分配所有自动控制权限
-        $systemAdmin = Role::where('name', 'system_admin')->first();
+        $systemAdmin = SysRole::where('name', 'system_admin')->first();
         if ($systemAdmin) {
             $systemAdmin->permissions()->syncWithoutDetaching($autoControlPermissionIds);
             $this->command->info('已为系统管理员分配自动控制权限');
         }
 
         // 为基地管理员分配所有自动控制权限
-        $baseAdmin = Role::where('name', 'base_admin')->first();
+        $baseAdmin = SysRole::where('name', 'base_admin')->first();
         if ($baseAdmin) {
             $baseAdmin->permissions()->syncWithoutDetaching($autoControlPermissionIds);
             $this->command->info('已为基地管理员分配自动控制权限');

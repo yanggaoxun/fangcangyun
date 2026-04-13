@@ -6,7 +6,6 @@ use App\Models\Chamber;
 use App\Models\ChamberControlConfig;
 use App\Models\ChamberControlLog;
 use App\Models\ChamberControlState;
-use App\Models\EnvironmentData;
 use Illuminate\Support\Facades\Log;
 
 class ChamberAutoControlService
@@ -393,9 +392,9 @@ class ChamberAutoControlService
     /**
      * 获取传感器数据
      */
-    protected function getSensorData(int $chamberId): ?EnvironmentData
+    protected function getSensorData(int $chamberId): ?ChamberEnvironmentData
     {
-        return EnvironmentData::where('chamber_id', $chamberId)
+        return ChamberEnvironmentData::where('chamber_id', $chamberId)
             ->latest('recorded_at')
             ->first();
     }
@@ -403,7 +402,7 @@ class ChamberAutoControlService
     /**
      * 获取传感器值
      */
-    protected function getSensorValue(EnvironmentData $data, string $sensor): ?float
+    protected function getSensorValue(ChamberEnvironmentData $data, string $sensor): ?float
     {
         return match ($sensor) {
             'temperature' => $data->temperature,

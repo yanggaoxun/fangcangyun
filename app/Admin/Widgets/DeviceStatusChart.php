@@ -2,7 +2,7 @@
 
 namespace App\Admin\Widgets;
 
-use App\Models\Device;
+use App\Models\DevDevice;
 use Filament\Widgets\ChartWidget;
 
 class DeviceStatusChart extends ChartWidget
@@ -15,10 +15,10 @@ class DeviceStatusChart extends ChartWidget
 
     protected function getData(): array
     {
-        $activeCount = Device::where('status', 'active')->count();
-        $inactiveCount = Device::where('status', 'inactive')->count();
-        $maintenanceCount = Device::where('status', 'maintenance')->count();
-        $errorCount = Device::where('status', 'error')->count();
+        $activeCount = DevDevice::where('status', 'active')->count();
+        $inactiveCount = DevDevice::where('status', 'inactive')->count();
+        $maintenanceCount = DevDevice::where('status', 'maintenance')->count();
+        $errorCount = DevDevice::where('status', 'error')->count();
 
         return [
             'datasets' => [

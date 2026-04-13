@@ -64,9 +64,33 @@ Authorization: Bearer 1|abc123def456...
 
 所有需要认证的 API 都需要在 Header 中添加 `Authorization: Bearer {token}`。
 
-### 环境数据 API
+### 方舱监控 API
 ```http
-POST /api/v1/environment-data
+GET /api/admin/chambers/monitor
+Authorization: Bearer {token}
+
+# Query Parameters:
+# - base_id: 基地ID (可选)
+# - chamber_id: 方舱ID (可选)
+# - is_anomaly: 是否异常 true/false (可选)
+# - from: 开始日期 YYYY-MM-DD (可选)
+# - to: 结束日期 YYYY-MM-DD (可选)
+# - per_page: 每页数量 1-100 (可选，默认15)
+```
+
+**获取最新监控数据：**
+```http
+GET /api/admin/chambers/monitor/latest
+Authorization: Bearer {token}
+
+# Query Parameters:
+# - base_id: 基地ID (可选)
+# - chamber_id: 方舱ID (可选)
+```
+
+**上传环境数据：**
+```http
+POST /api/admin/chambers/monitor
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -79,34 +103,22 @@ Content-Type: application/json
 }
 ```
 
-### 设备控制 API
+**批量上传环境数据：**
 ```http
-POST /api/v1/chambers/{deviceCode}/devices/control
+POST /api/admin/chambers/monitor/batch
 Authorization: Bearer {token}
 Content-Type: application/json
 
 {
-  "device": "cooling",
-  "state": true
-}
-```
-
-### 自动控制 API
-```http
-GET /api/v1/chambers/{deviceCode}/auto-control
-Authorization: Bearer {token}
-```
-
-```http
-PUT /api/v1/chambers/{deviceCode}/auto-control/temperature
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "mode": "schedule",
-  "is_enabled": true,
-  "threshold_upper": 26.0,
-  "threshold_lower": 22.0
+  "chamber_code": "CH001",
+  "data": [
+    {
+      "temperature": 24.5,
+      "humidity": 65.0,
+      "co2_level": 800,
+      "recorded_at": "2026-04-12T10:00:00Z"
+    }
+  ]
 }
 ```
 

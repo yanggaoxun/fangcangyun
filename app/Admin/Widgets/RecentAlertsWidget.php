@@ -2,7 +2,7 @@
 
 namespace App\Admin\Widgets;
 
-use App\Models\Alert;
+use App\Models\SysAlert;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -19,7 +19,7 @@ class RecentAlertsWidget extends BaseWidget
     {
         return $table
             ->query(
-                Alert::query()
+                SysAlert::query()
                     ->with('chamber')
                     ->where('is_acknowledged', false)
                     ->orderBy('created_at', 'desc')

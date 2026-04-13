@@ -11,6 +11,8 @@ class Chamber extends Model
 {
     use HasFactory;
 
+    protected $table = 'chambers_chambers';
+
     protected $fillable = [
         'code',
         'device_code',
@@ -48,7 +50,7 @@ class Chamber extends Model
 
     public function base(): BelongsTo
     {
-        return $this->belongsTo(Base::class);
+        return $this->belongsTo(ChamberBase::class);
     }
 
     public function getCurrentBatchAttribute()

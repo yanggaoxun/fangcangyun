@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chamber;
-use App\Models\EnvironmentData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +24,7 @@ class ChamberDeviceController extends Controller
             ], 404);
         }
 
-        $status = EnvironmentData::where('chamber_id', $chamber->id)
+        $status = ChamberEnvironmentData::where('chamber_id', $chamber->id)
             ->latest('recorded_at')
             ->first();
 
@@ -98,7 +97,7 @@ class ChamberDeviceController extends Controller
         $settings = $request->input('settings', []);
 
         // 获取当前最新数据
-        $latestData = EnvironmentData::where('chamber_id', $chamber->id)
+        $latestData = ChamberEnvironmentData::where('chamber_id', $chamber->id)
             ->latest('recorded_at')
             ->first();
 
@@ -123,7 +122,7 @@ class ChamberDeviceController extends Controller
         ];
 
         // 创建新的环境数据记录
-        $newData = EnvironmentData::create([
+        $newData = ChamberEnvironmentData::create([
             'chamber_id' => $chamber->id,
             'temperature' => $latestData?->temperature ?? 0,
             'humidity' => $latestData?->humidity ?? 0,
@@ -177,7 +176,7 @@ class ChamberDeviceController extends Controller
         $state = $request->input('state');
 
         // 获取当前最新数据
-        $latestData = EnvironmentData::where('chamber_id', $chamber->id)
+        $latestData = ChamberEnvironmentData::where('chamber_id', $chamber->id)
             ->latest('recorded_at')
             ->first();
 
@@ -195,7 +194,7 @@ class ChamberDeviceController extends Controller
         ];
 
         // 创建新的环境数据记录
-        $newData = EnvironmentData::create([
+        $newData = ChamberEnvironmentData::create([
             'chamber_id' => $chamber->id,
             'temperature' => $latestData?->temperature ?? 0,
             'humidity' => $latestData?->humidity ?? 0,
@@ -219,7 +218,7 @@ class ChamberDeviceController extends Controller
             'data' => [
                 'chamber_code' => $chamber->code,
                 'device' => $device,
-                'device_name' => EnvironmentData::getDeviceNames()[$device],
+                'device_name' => ChamberEnvironmentData::getDeviceNames()[$device],
                 'state' => $state,
                 'executed_at' => $newData->recorded_at->toIso8601String(),
             ],
@@ -257,7 +256,7 @@ class ChamberDeviceController extends Controller
         $devices = $request->input('devices');
 
         // 获取当前最新数据
-        $latestData = EnvironmentData::where('chamber_id', $chamber->id)
+        $latestData = ChamberEnvironmentData::where('chamber_id', $chamber->id)
             ->latest('recorded_at')
             ->first();
 
@@ -277,13 +276,13 @@ class ChamberDeviceController extends Controller
         foreach ($devices as $item) {
             $device = $item['device'];
             $state = $item['state'];
-            if (in_array($device, EnvironmentData::getDeviceList())) {
+            if (in_array($device, ChamberEnvironmentData::getDeviceList())) {
                 $deviceStates[$device] = $state;
             }
         }
 
         // 创建新的环境数据记录
-        $newData = EnvironmentData::create([
+        $newData = ChamberEnvironmentData::create([
             'chamber_id' => $chamber->id,
             'temperature' => $latestData?->temperature ?? 0,
             'humidity' => $latestData?->humidity ?? 0,

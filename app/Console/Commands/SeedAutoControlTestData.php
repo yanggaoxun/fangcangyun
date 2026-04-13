@@ -7,7 +7,6 @@ use App\Models\ChamberControlConfig;
 use App\Models\ChamberControlLog;
 use App\Models\ChamberControlState;
 use App\Models\ChamberSchedule;
-use App\Models\User;
 use Illuminate\Console\Command;
 
 class SeedAutoControlTestData extends Command
@@ -212,7 +211,7 @@ class SeedAutoControlTestData extends Command
         $controlTypes = ['temperature', 'humidity', 'fresh_air', 'exhaust', 'lighting'];
         $triggerTypes = ['auto', 'manual', 'linkage'];
         $actions = ['turn_on', 'turn_off'];
-        $users = User::pluck('id')->toArray();
+        $users = SysUser::pluck('id')->toArray();
         if (empty($users)) {
             $users = [1];
         }

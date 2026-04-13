@@ -10,9 +10,11 @@ class MushroomStrain extends Model
 {
     use HasFactory;
 
+    protected $table = 'mush_strains';
+
     protected $fillable = [
         'code',
-        //'name',
+        // 'name',
         'scientific_name',
         'type',
         'supplier',
@@ -56,13 +58,13 @@ class MushroomStrain extends Model
 
     public function baseStocks(): HasMany
     {
-        return $this->hasMany(BaseStrainStock::class, 'strain_id');
+        return $this->hasMany(MushroomStock::class, 'strain_id');
     }
 
     /**
      * 获取在特定基地的库存
      */
-    public function getStockInBase(int $baseId): ?BaseStrainStock
+    public function getStockInBase(int $baseId): ?MushroomStock
     {
         return $this->baseStocks()->where('base_id', $baseId)->first();
     }

@@ -87,7 +87,7 @@ class ChamberAutoControlController extends Controller
      */
     public function getConfig(string $deviceCode): JsonResponse
     {
-        if ($response = $this->checkPermission('auto_control.view')) {
+        if ($response = $this->checkPermission('chambers.auto_control.view')) {
             return $response;
         }
 
@@ -352,7 +352,7 @@ class ChamberAutoControlController extends Controller
      */
     public function updateConfig(Request $request, string $deviceCode, string $controlType): JsonResponse
     {
-        if ($response = $this->checkPermission('auto_control.config')) {
+        if ($response = $this->checkPermission('chambers.auto_control.edit')) {
             return $response;
         }
 
@@ -574,7 +574,7 @@ class ChamberAutoControlController extends Controller
         string $controlType,
         ChamberAutoControlService $service
     ): JsonResponse {
-        if ($response = $this->checkPermission('auto_control.manual')) {
+        if ($response = $this->checkPermission('chambers.manual_control.view')) {
             return $response;
         }
 
@@ -625,7 +625,7 @@ class ChamberAutoControlController extends Controller
      */
     public function getDeviceStatus(string $deviceCode): JsonResponse
     {
-        if ($response = $this->checkPermission('auto_control.view')) {
+        if ($response = $this->checkPermission('chambers.auto_control.view')) {
             return $response;
         }
 
@@ -660,7 +660,7 @@ class ChamberAutoControlController extends Controller
      */
     public function getLogs(Request $request, string $deviceCode): JsonResponse
     {
-        if ($response = $this->checkPermission('auto_control.logs')) {
+        if ($response = $this->checkPermission('chambers.control_log.view')) {
             return $response;
         }
 
@@ -685,7 +685,7 @@ class ChamberAutoControlController extends Controller
      */
     public function getSchedules(string $deviceCode, string $controlType): JsonResponse
     {
-        if ($response = $this->checkPermission('auto_control.view')) {
+        if ($response = $this->checkPermission('chambers.auto_control.view')) {
             return $response;
         }
 
@@ -717,7 +717,7 @@ class ChamberAutoControlController extends Controller
         string $controlType,
         int $scheduleIndex
     ): JsonResponse {
-        if ($response = $this->checkPermission('auto_control.config')) {
+        if ($response = $this->checkPermission('chambers.auto_control.edit')) {
             return $response;
         }
 

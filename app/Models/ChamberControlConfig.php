@@ -11,6 +11,8 @@ class ChamberControlConfig extends Model
 {
     use HasFactory;
 
+    protected $table = 'chambers_control_configs';
+
     protected $fillable = [
         'chamber_id',
         'control_type',

@@ -247,17 +247,24 @@
 ## 数据库设计
 
 ### 核心数据表
-- `bases` 表：存储基地信息
-- `base_strain_stocks` 表：存储各基地的菌种库存
-- `chambers` 表：存储方舱信息
-- `mushroom_strains` 表：存储菌种信息
-- `batches` 表：存储菌包批次信息
-- `chamber_environment_data` 表：存储环境数据和设备状态（宽表设计）
-- `chamber_control_configs` 表（2025-04-07新增）：存储自动控制配置
-- `chamber_schedules` 表（2025-04-07新增）：存储时段配置
-- `devices` 表：存储设备信息
-- `alerts` 表：存储告警信息
-- `users/roles/permissions` 表：用户权限管理
+- `chambers_bases` 表：存储基地信息
+- `chambers_chambers` 表：存储方舱信息
+- `chambers_environment_data` 表：存储环境数据和设备状态
+- `chambers_control_configs` 表：存储自动控制配置
+- `chambers_schedules` 表：存储时段配置
+- `chambers_control_logs` 表：存储控制日志
+- `chambers_control_states` 表：存储控制状态
+- `mush_strains` 表：存储菌种信息
+- `mush_batches` 表：存储菌包批次信息
+- `mush_stocks` 表：存储基地菌种库存
+- `dev_devices` 表：存储设备信息
+- `dev_controls` 表：存储设备控制记录
+- `sys_users` 表：存储系统用户信息
+- `sys_roles` 表：存储系统角色
+- `sys_permissions` 表：存储系统权限
+- `sys_user_role` 表：用户角色关联
+- `sys_role_permission` 表：角色权限关联
+- `sys_alerts` 表：存储告警信息
 
 ### 关键设计变更（2025-03-30）
 **环境数据表重构**：

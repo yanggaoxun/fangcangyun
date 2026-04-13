@@ -2,11 +2,11 @@
 
 namespace App\Admin\Widgets;
 
-use App\Models\Alert;
-use App\Models\Base;
-use App\Models\Batch;
 use App\Models\Chamber;
-use App\Models\Device;
+use App\Models\ChamberBase;
+use App\Models\DevDevice;
+use App\Models\MushroomBatch;
+use App\Models\SysAlert;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -22,8 +22,8 @@ class DashboardStatsWidget extends BaseWidget
     protected function getStats(): array
     {
         // 基地统计
-        $baseCount = Base::count();
-        $baseActiveCount = Base::where('status', 'active')->count();
+        $baseCount = ChamberBase::count();
+        $baseActiveCount = ChamberBase::where('status', 'active')->count();
         $baseInactiveCount = $baseCount - $baseActiveCount;
 
         // 方舱统计
@@ -36,32 +36,32 @@ class DashboardStatsWidget extends BaseWidget
             : 0;
 
         // 批次统计
-        $activeBatches = Batch::whereNull('actual_harvest_date')->count();
-        $todayNewBatches = Batch::whereDate('created_at', today())->count();
-        $yesterdayNewBatches = Batch::whereDate('created_at', today()->subDay())->count();
+        $activeBatches = MushroomBatch::whereNull('actual_harvest_date')->count();
+        $todayNewBatches = MushroomBatch::whereDate('created_at', today())->count();
+        $yesterdayNewBatches = MushroomBatch::whereDate('created_at', today()->subDay())->count();
         $batchTrend = $todayNewBatches - $yesterdayNewBatches;
 
         // 设备统计
-        $deviceCount = Device::count();
-        $deviceActiveCount = Device::where('status', 'active')->count();
-        $deviceErrorCount = Device::where('status', 'error')->count();
+        $deviceCount = DevDevice::count();
+        $deviceActiveCount = DevDevice::where('status', 'active')->count();
+        $deviceErrorCount = DevDevice::where('status', 'error')->count();
         $deviceOnlineRate = $deviceCount > 0
             ? round(($deviceActiveCount / $deviceCount) * 100, 1)
             : 0;
 
         // 报警统计
-        $unacknowledgedAlerts = Alert::where('is_acknowledged', false)->count();
-        $criticalAlerts = Alert::where('is_acknowledged', false)
+        $unacknowledgedAlerts = SysAlert::where('is_acknowledged', false)->count();
+        $criticalAlerts = SysAlert::where('is_acknowledged', false)
             ->where('level', 'critical')
             ->count();
-        $warningAlerts = Alert::where('is_acknowledged', false)
+        $warningAlerts = SysAlert::where('is_acknowledged', false)
             ->where('level', 'warning')
             ->count();
 
         // 产量统计
-        $todayYield = Batch::whereDate('actual_harvest_date', today())
+        $todayYield = MushroomBatch::whereDate('actual_harvest_date', today())
             ->sum('actual_yield') ?? 0;
-        $yesterdayYield = Batch::whereDate('actual_harvest_date', today()->subDay())
+        $yesterdayYield = MushroomBatch::whereDate('actual_harvest_date', today()->subDay())
             ->sum('actual_yield') ?? 0;
         $yieldTrend = $todayYield - $yesterdayYield;
         $yieldTrendPercent = $yesterdayYield > 0

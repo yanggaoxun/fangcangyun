@@ -2,7 +2,7 @@
 
 namespace App\Admin\Widgets;
 
-use App\Models\Batch;
+use App\Models\MushroomBatch;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -19,7 +19,7 @@ class BatchProgressWidget extends BaseWidget
     {
         return $table
             ->query(
-                Batch::query()
+                MushroomBatch::query()
                     ->with(['chamber', 'strain'])
                     ->whereNull('actual_harvest_date')
                     ->orderBy('inoculation_date', 'desc')

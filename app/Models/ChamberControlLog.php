@@ -10,6 +10,8 @@ class ChamberControlLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'chambers_control_logs';
+
     protected $fillable = [
         'chamber_id',
         'control_type',
@@ -35,7 +37,7 @@ class ChamberControlLog extends Model
 
     public function executedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'executed_by');
+        return $this->belongsTo(SysUser::class, 'executed_by');
     }
 
     /**

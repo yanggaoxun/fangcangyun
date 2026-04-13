@@ -104,7 +104,10 @@ php artisan filament:upgrade
 - **DB Container**: MySQL 8.0, accessible at localhost:3307
 
 ### Key Directories
-- `app/Admin/`: Filament admin resources, pages, and widgets
+- `app/Admin/Resources/Chambers/`: 方舱管理（Bases, Chambers, Monitor）
+- `app/Admin/Resources/Mushroom/`: 菌菇管理（Strains, Batches, Stocks）
+- `app/Admin/Resources/Devices/`: 设备管理（Devices, Controls）
+- `app/Admin/Resources/System/`: 系统管理（Users, Alerts）
 - `app/Models/`: Eloquent models
 - `database/migrations/`: Database migrations
 - `config/`: Configuration files
