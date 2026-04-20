@@ -5,7 +5,7 @@ namespace App\Admin\Resources\Chambers\Chambers\Pages;
 use App\Admin\Resources\Chambers\Chambers\ChamberResource;
 use App\Models\Chamber;
 use App\Models\ChamberBase;
-use App\Models\ChamberEnvironmentData;
+use App\Models\ChamberManualControl;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -61,7 +61,7 @@ class ChamberMonitoring extends Page implements HasTable
 
     public function toggleDevice(int $chamberId, string $device): void
     {
-        $record = ChamberEnvironmentData::where('chamber_id', $chamberId)->latest('recorded_at')->first();
+        $record = ChamberManualControl::where('chamber_id', $chamberId)->latest('recorded_at')->first();
 
         if (! $record) {
             Notification::make()
@@ -81,7 +81,7 @@ class ChamberMonitoring extends Page implements HasTable
             'recorded_at' => now(),
         ]);
 
-        $deviceNames = ChamberEnvironmentData::getDeviceNames();
+        $deviceNames = ChamberManualControl::getDeviceNames();
         $deviceName = $deviceNames[$device] ?? $device;
 
         Notification::make()
@@ -94,7 +94,7 @@ class ChamberMonitoring extends Page implements HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(ChamberEnvironmentData::query()->with(['chamber.base', 'chamber']))
+            ->query(ChamberManualControl::query()->with(['chamber.base', 'chamber']))
             ->columns([
                 TextColumn::make('chamber.base.name')
                     ->label('基地')

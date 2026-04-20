@@ -16,25 +16,19 @@ class DevDevice extends Model
     protected $fillable = [
         'code',
         'name',
-        'type',
         'status',
+        'base_id',
         'chamber_id',
-        'brand',
-        'model',
         'serial_number',
-        'specifications',
-        'is_automated',
-        'last_maintenance_at',
-        'installed_at',
         'notes',
     ];
 
-    protected $casts = [
-        'specifications' => 'array',
-        'is_automated' => 'boolean',
-        'last_maintenance_at' => 'datetime',
-        'installed_at' => 'datetime',
-    ];
+    protected $casts = [];
+
+    public function base(): BelongsTo
+    {
+        return $this->belongsTo(ChamberBase::class);
+    }
 
     public function chamber(): BelongsTo
     {
@@ -59,25 +53,5 @@ class DevDevice extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
-    }
-
-    public function scopeAutomated($query)
-    {
-        return $query->where('is_automated', true);
-    }
-
-    public function scopeByType($query, $type)
-    {
-        return $query->where('type', $type);
-    }
-
-    public function needsMaintenance(): bool
-    {
-        if (! $this->last_maintenance_at) {
-            return true;
-        }
-
-        // Check if it's been more than 30 days since last maintenance
-        return $this->last_maintenance_at->diffInDays(now()) > 30;
     }
 }

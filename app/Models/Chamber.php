@@ -15,7 +15,6 @@ class Chamber extends Model
 
     protected $fillable = [
         'code',
-        'device_code',
         'name',
         'base_id',
         'capacity',
@@ -30,22 +29,22 @@ class Chamber extends Model
 
     public function batches(): HasMany
     {
-        return $this->hasMany(Batch::class);
+        return $this->hasMany(MushroomBatch::class);
     }
 
     public function environmentData(): HasMany
     {
-        return $this->hasMany(EnvironmentData::class);
+        return $this->hasMany(ChamberManualControl::class);
     }
 
     public function devices(): HasMany
     {
-        return $this->hasMany(Device::class);
+        return $this->hasMany(DevDevice::class);
     }
 
     public function alerts(): HasMany
     {
-        return $this->hasMany(Alert::class);
+        return $this->hasMany(SysAlert::class);
     }
 
     public function base(): BelongsTo
@@ -55,6 +54,6 @@ class Chamber extends Model
 
     public function getCurrentBatchAttribute()
     {
-        return $this->batches()->where('status', 'active')->first();
+        return $this->batches()->active()->first();
     }
 }

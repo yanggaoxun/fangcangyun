@@ -1,8 +1,8 @@
 <div class="p-5" style="min-width: 850px;">
     @php
-        $deviceNames = App\Models\ChamberEnvironmentData::getDeviceNames();
+        $deviceNames = App\Models\ChamberManualControl::getDeviceNames();
         $chamber = App\Models\Chamber::find($chamberId);
-        $latestData = App\Models\ChamberEnvironmentData::where('chamber_id', $chamberId)->latest('recorded_at')->first();
+        $latestData = App\Models\ChamberManualControl::where('chamber_id', $chamberId)->latest('recorded_at')->first();
     @endphp
 
     @if($chamber)

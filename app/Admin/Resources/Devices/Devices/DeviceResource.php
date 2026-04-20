@@ -6,6 +6,8 @@ use App\Admin\Resources\Devices\Devices\Pages\CreateDevice;
 use App\Admin\Resources\Devices\Devices\Pages\EditDevice;
 use App\Admin\Resources\Devices\Devices\Pages\ListDevices;
 use App\Admin\Resources\Devices\Devices\Tables\DevicesTable;
+use App\Models\Chamber;
+use App\Models\ChamberBase;
 use App\Models\DevDevice;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -17,7 +19,7 @@ class DeviceResource extends Resource
 {
     protected static ?string $model = DevDevice::class;
 
-    protected static ?string $navigationLabel = '设备管理';
+    protected static ?string $navigationLabel = '边缘设备';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCpuChip;
 
@@ -41,28 +43,28 @@ class DeviceResource extends Resource
                     ->required()
                     ->maxLength(255),
 
+                \Filament\Forms\Components\Select::make('base_id')
+                    ->label('所属基地')
+                    ->options(ChamberBase::where('status', 'active')->pluck('name', 'id'))
+                    ->searchable()
+                    ->required()
+                    ->live(),
+
                 \Filament\Forms\Components\Select::make('chamber_id')
                     ->label('所属方舱')
-                    ->options(function () {
-                        return Chamber::where('status', '!=', 'maintenance')
+                    ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
+                        $baseId = $get('base_id');
+                        if (! $baseId) {
+                            return [];
+                        }
+
+                        return Chamber::where('base_id', $baseId)
+                            ->where('status', '!=', 'maintenance')
                             ->pluck('name', 'id');
                     })
                     ->searchable()
-                    ->placeholder('选择方舱（可选）'),
-
-                \Filament\Forms\Components\Select::make('type')
-                    ->label('设备类型')
                     ->required()
-                    ->options([
-                        'air_conditioner' => '空调',
-                        'humidifier' => '加湿器',
-                        'dehumidifier' => '除湿器',
-                        'ventilation' => '通风设备',
-                        'led_light' => 'LED补光灯',
-                        'sprinkler' => '喷淋系统',
-                        'co2_generator' => 'CO2发生器',
-                        'sensor' => '传感器',
-                    ]),
+                    ->placeholder('选择方舱'),
 
                 \Filament\Forms\Components\Select::make('status')
                     ->label('状态')
@@ -74,6 +76,17 @@ class DeviceResource extends Resource
                         'error' => '故障',
                     ])
                     ->default('active'),
+
+                \Filament\Forms\Components\TextInput::make('serial_number')
+                    ->label('序列号')
+                    ->maxLength(255)
+                    ->nullable(),
+
+                \Filament\Forms\Components\Textarea::make('notes')
+                    ->label('备注')
+                    ->rows(3)
+                    ->columnSpanFull()
+                    ->nullable(),
             ]);
     }
 

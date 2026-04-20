@@ -392,9 +392,9 @@ class ChamberAutoControlService
     /**
      * 获取传感器数据
      */
-    protected function getSensorData(int $chamberId): ?ChamberEnvironmentData
+    protected function getSensorData(int $chamberId): ?ChamberManualControl
     {
-        return ChamberEnvironmentData::where('chamber_id', $chamberId)
+        return ChamberManualControl::where('chamber_id', $chamberId)
             ->latest('recorded_at')
             ->first();
     }
@@ -402,7 +402,7 @@ class ChamberAutoControlService
     /**
      * 获取传感器值
      */
-    protected function getSensorValue(ChamberEnvironmentData $data, string $sensor): ?float
+    protected function getSensorValue(ChamberManualControl $data, string $sensor): ?float
     {
         return match ($sensor) {
             'temperature' => $data->temperature,

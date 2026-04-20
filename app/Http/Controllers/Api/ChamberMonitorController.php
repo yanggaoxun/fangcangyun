@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chamber;
-use App\Models\ChamberEnvironmentData;
+use App\Models\ChamberManualControl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,8 +17,8 @@ class ChamberMonitorController extends Controller
     public function index(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'base_id' => 'nullable|integer|exists:chamber_bases,id',
-            'chamber_id' => 'nullable|integer|exists:chambers,id',
+            'base_id' => 'nullable|integer|exists:chambers_bases,id',
+            'chamber_id' => 'nullable|integer|exists:chambers_chambers,id',
             'is_anomaly' => 'nullable|boolean',
             'from' => 'nullable|date',
             'to' => 'nullable|date',
@@ -33,7 +33,7 @@ class ChamberMonitorController extends Controller
             ], 422);
         }
 
-        $query = ChamberEnvironmentData::query()
+        $query = ChamberManualControl::query()
             ->with(['chamber.base', 'chamber']);
 
         // Apply filters
@@ -75,8 +75,8 @@ class ChamberMonitorController extends Controller
     public function latest(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'base_id' => 'nullable|integer|exists:chamber_bases,id',
-            'chamber_id' => 'nullable|integer|exists:chambers,id',
+            'base_id' => 'nullable|integer|exists:chambers_bases,id',
+            'chamber_id' => 'nullable|integer|exists:chambers_chambers,id',
         ]);
 
         if ($validator->fails()) {
@@ -87,30 +87,36 @@ class ChamberMonitorController extends Controller
             ], 422);
         }
 
-        // Get latest record for each chamber
-        $subQuery = ChamberEnvironmentData::select('chamber_id')
-            ->selectRaw('MAX(recorded_at) as latest_recorded_at')
-            ->groupBy('chamber_id');
+        $table = (new ChamberManualControl)->getTable();
 
-        $query = ChamberEnvironmentData::query()
+        // Get latest record IDs for each chamber using subquery
+        $latestIds = ChamberManualControl::query()
+            ->select('id')
+            ->from($table.' as t1')
+            ->whereRaw("t1.recorded_at = (select max(t2.recorded_at) from {$table} as t2 where t2.chamber_id = t1.chamber_id)");
+
+        if ($request->has('chamber_id')) {
+            $latestIds->where('t1.chamber_id', $request->chamber_id);
+        }
+
+        $query = ChamberManualControl::query()
             ->with(['chamber.base', 'chamber'])
-            ->joinSub($subQuery, 'latest', function ($join) {
-                $join->on('chamber_environment_data.chamber_id', '=', 'latest.chamber_id')
-                    ->on('chamber_environment_data.recorded_at', '=', 'latest.latest_recorded_at');
-            });
+            ->whereIn('id', $latestIds);
 
-        // Apply filters
+        // Apply base filter via chamber relationship
         if ($request->has('base_id')) {
             $query->whereHas('chamber', function ($q) use ($request) {
                 $q->where('base_id', $request->base_id);
             });
         }
 
-        if ($request->has('chamber_id')) {
-            $query->where('chamber_environment_data.chamber_id', $request->chamber_id);
-        }
-
         $data = $query->get();
+
+        $data->transform(function ($item) {
+            $item->chamber_name = $item->chamber?->name ?? '未知方舱';
+
+            return $item;
+        });
 
         return response()->json([
             'success' => true,
@@ -175,7 +181,7 @@ class ChamberMonitorController extends Controller
 
         // Create the environment data record
         try {
-            $environmentData = ChamberEnvironmentData::create([
+            $environmentData = ChamberManualControl::create([
                 'chamber_id' => $chamber->id,
                 'temperature' => $request->temperature,
                 'humidity' => $request->humidity,
@@ -255,7 +261,7 @@ class ChamberMonitorController extends Controller
 
         foreach ($request->data as $index => $dataPoint) {
             try {
-                $environmentData = ChamberEnvironmentData::create([
+                $environmentData = ChamberManualControl::create([
                     'chamber_id' => $chamber->id,
                     'temperature' => $dataPoint['temperature'],
                     'humidity' => $dataPoint['humidity'],

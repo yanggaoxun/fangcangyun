@@ -8,6 +8,7 @@ use App\Admin\Resources\Chambers\Chambers\Pages\EditChamber;
 use App\Admin\Resources\Chambers\Chambers\Pages\ListChambers;
 use App\Admin\Resources\Chambers\Chambers\Tables\ChambersTable;
 use App\Models\Chamber;
+use App\Models\ChamberBase;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -53,19 +54,6 @@ class ChamberResource extends Resource
                     )
                     ->validationMessages([
                         'unique' => '该方舱编号已存在',
-                    ]),
-
-                Forms\Components\TextInput::make('device_code')
-                    ->label('边缘设备编码')
-                    ->helperText('用于远程控制设备关联和数据传输识别')
-                    ->maxLength(100)
-                    ->unique(
-                        table: 'chambers',
-                        column: 'device_code',
-                        ignoreRecord: true,
-                    )
-                    ->validationMessages([
-                        'unique' => '该设备编码已被使用',
                     ]),
 
                 Forms\Components\TextInput::make('name')

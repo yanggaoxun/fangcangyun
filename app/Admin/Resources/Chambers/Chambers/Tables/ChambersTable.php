@@ -23,11 +23,6 @@ class ChambersTable
                 TextColumn::make('code')
                     ->label('方舱编号')
                     ->searchable(),
-                TextColumn::make('device_code')
-                    ->label('边缘设备编码')
-                    ->searchable()
-                    ->toggleable()
-                    ->placeholder('未绑定'),
                 TextColumn::make('name')
                     ->label('方舱名称')
                     ->searchable(),
