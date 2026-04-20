@@ -8,9 +8,11 @@ services:
     container_name: laravel_app
     volumes:
       - ./:/var/www/html
-      - app_vendor:/var/www/html/vendor
+    ports:
+      - "8000:8000"
     networks:
       - laravel
+    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8000 --workers=4 --task-workers=2
 
   web:
     image: nginx
@@ -41,9 +43,37 @@ services:
     networks:
       - laravel
 
+
+  emqx:
+    image: emqx/emqx:5.8.6
+    container_name: laravel_emqx
+    environment:
+      - EMQX_NAME=emqx
+      - EMQX_HOST=node1.emqx.io
+      - EMQX_LISTENERS__TCP__DEFAULT__BIND=0.0.0.0:1883
+      - EMQX_LISTENERS__SSL__DEFAULT__BIND=0.0.0.0:8883
+      - EMQX_LISTENERS__WS__DEFAULT__BIND=0.0.0.0:8083
+      - EMQX_DASHBOARD__LISTENERS__HTTP__BIND=0.0.0.0:18083
+      - EMQX_ALLOW_ANONYMOUS=false
+      - EMQX_AUTHENTICATION__1__MECHANISM=password_based
+      - EMQX_AUTHENTICATION__1__BACKEND=built_in_database
+      - EMQX_AUTHENTICATION__1__ENABLE=true
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "8083:8083"
+      - "18083:18083"
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
+    networks:
+      - laravel
+    depends_on:
+      - db
 networks:
   laravel:
 
 volumes:
   db_data:
-  app_vendor:
+  emqx_data:
+  emqx_log:
