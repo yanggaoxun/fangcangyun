@@ -189,13 +189,19 @@ class MqttConsumerProcess
                 return;
             }
 
+            $commandId = $data['command_id'] ?? null;
+            $status = $data['status'] ?? 'unknown';
+
             \Log::info('Command ACK received', [
                 'chamber' => $chamberCode,
-                'command_id' => $data['command_id'] ?? null,
-                'status' => $data['status'] ?? null,
+                'command_id' => $commandId,
+                'status' => $status,
             ]);
 
-            // TODO: 更新命令执行状态、清除待确认命令等
+            // 更新命令执行状态
+            if ($commandId) {
+                \App\Models\ChamberControlLog::updateAckStatus($commandId, $status);
+            }
 
         } catch (\Exception $e) {
             \Log::error('MQTT ACK processing error: '.$e->getMessage());

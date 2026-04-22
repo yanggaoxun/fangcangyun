@@ -18,6 +18,9 @@ class ChamberControlLog extends Model
         'trigger_type',
         'trigger_reason',
         'action',
+        'command_id',
+        'ack_status',
+        'ack_at',
         'sensor_data',
         'config_snapshot',
         'executed_at',
@@ -104,6 +107,37 @@ class ChamberControlLog extends Model
     public function scopeToday($query)
     {
         return $query->whereDate('executed_at', today());
+    }
+
+    /**
+     * 更新 ACK 状态
+     */
+    public static function updateAckStatus(string $commandId, string $status): ?self
+    {
+        $log = self::where('command_id', $commandId)->first();
+
+        if ($log) {
+            $log->update([
+                'ack_status' => $status,
+                'ack_at' => now(),
+            ]);
+        }
+
+        return $log;
+    }
+
+    /**
+     * 获取 ACK 状态标签
+     */
+    public function getAckStatusLabel(): string
+    {
+        return match ($this->ack_status) {
+            'pending' => '等待确认',
+            'success' => '执行成功',
+            'failed' => '执行失败',
+            'timeout' => '超时',
+            default => $this->ack_status ?? '未知',
+        };
     }
 
     /**

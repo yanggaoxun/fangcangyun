@@ -73,22 +73,47 @@ class ChamberMonitoring extends Page implements HasTable
             return;
         }
 
+        // 查找方舱和关联的边缘设备
+        $chamber = Chamber::with('devices')->find($chamberId);
+        $devDevice = $chamber?->devices()->first();
+
+        if (! $devDevice || ! $devDevice->code) {
+            Notification::make()
+                ->title('错误')
+                ->body('未找到该方舱的边缘设备')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $currentState = $record->$device ?? false;
         $newState = ! $currentState;
-
-        $record->update([
-            $device => $newState,
-            'recorded_at' => now(),
-        ]);
-
         $deviceNames = ChamberManualControl::getDeviceNames();
         $deviceName = $deviceNames[$device] ?? $device;
 
-        Notification::make()
-            ->title('操作成功')
-            ->body("{$deviceName} 已切换为 ".($newState ? '开启' : '关闭'))
-            ->success()
-            ->send();
+        try {
+            // 使用队列异步发送 MQTT 命令（方案 A：先发 MQTT，成功后更新数据库）
+            \App\Jobs\SendMqttControlCommand::dispatch(
+                chamberId: $chamberId,
+                deviceCode: $devDevice->code,
+                actions: [$device => $newState],
+                userId: auth()->id(),
+            );
+
+            Notification::make()
+                ->title('命令已下发')
+                ->body("{$deviceName} 控制命令已发送到边缘设备，请等待执行结果")
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('操作失败')
+                ->body('设备命令下发失败：'.$e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
     public function table(Table $table): Table
