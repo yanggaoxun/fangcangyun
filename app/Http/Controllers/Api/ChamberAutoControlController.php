@@ -559,8 +559,19 @@ class ChamberAutoControlController extends Controller
             }
         }
 
+        // 查找边缘设备并异步发送配置同步
+        $devDevice = $chamber->devices()->first();
+        if ($devDevice && $devDevice->code) {
+            \App\Jobs\SendMqttAutoConfig::dispatch(
+                chamberId: $chamber->id,
+                deviceCode: $devDevice->code,
+                controlType: $controlType,
+                config: $config->fresh()->toArray()
+            );
+        }
+
         return response()->json([
-            'message' => '配置已更新',
+            'message' => '配置已更新'.($devDevice && $devDevice->code ? '，正在同步到边缘设备' : ''),
             'config' => $config,
         ]);
     }

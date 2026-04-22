@@ -130,12 +130,24 @@ class MqttConsumerProcess
                 }
             }
 
+            // 确保所有设备控制字段都有默认值（false = 关闭）
+            $deviceFields = [
+                'inner_circulation', 'cooling', 'heating', 'fan',
+                'four_way_valve', 'fresh_air', 'humidification',
+                'lighting_supplement', 'lighting',
+            ];
+            foreach ($deviceFields as $field) {
+                if (! array_key_exists($field, $recordData)) {
+                    $recordData[$field] = false;
+                }
+            }
+
             // 存在则更新，不存在则创建
             ChamberManualControl::updateOrCreate(
                 ['chamber_id' => $chamberId],
                 $recordData
             );
-
+            echo '1111';
             // 触发自动控制
             $this->processAutoControl($chamberId, $data);
 

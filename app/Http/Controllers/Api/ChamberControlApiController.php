@@ -162,29 +162,22 @@ class ChamberControlApiController extends Controller
             $validator->validated()
         );
 
-        // 通过 MQTT 同步配置到边缘设备
-        try {
-            \App\Services\MqttPublisher::publishAutoConfig(
-                $chamber->code,
-                $controlType,
-                $config->toArray()
+        // 查找边缘设备并异步发送配置同步
+        $devDevice = $chamber->devices()->first();
+        if ($devDevice && $devDevice->code) {
+            \App\Jobs\SendMqttAutoConfig::dispatch(
+                chamberId: $chamber->id,
+                deviceCode: $devDevice->code,
+                controlType: $controlType,
+                config: $config->fresh()->toArray()
             );
-
-            return response()->json([
-                'success' => true,
-                'message' => '配置已更新并同步到边缘设备',
-                'data' => $config,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('MQTT config sync failed: '.$e->getMessage());
-
-            return response()->json([
-                'success' => true,
-                'message' => '配置已更新，但同步到边缘设备失败',
-                'warning' => $e->getMessage(),
-                'data' => $config,
-            ]);
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => '配置已更新'.($devDevice && $devDevice->code ? '，正在同步到边缘设备' : ''),
+            'data' => $config,
+        ]);
     }
 
     /**

@@ -48,7 +48,7 @@ class ChamberResource extends Resource
                     ->required()
                     ->maxLength(50)
                     ->unique(
-                        table: 'chambers',
+                        table: 'chambers_chambers',
                         column: 'code',
                         ignoreRecord: true,
                     )
@@ -61,7 +61,7 @@ class ChamberResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(
-                        table: 'chambers',
+                        table: 'chambers_chambers',
                         column: 'name',
                         ignoreRecord: true,
                     )
