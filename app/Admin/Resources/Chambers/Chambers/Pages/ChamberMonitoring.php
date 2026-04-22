@@ -155,7 +155,6 @@ class ChamberMonitoring extends Page implements HasTable
                     ->modalCancelAction(false)
                     ->modalContent(fn ($record) => view('filament.resources.chambers.pages.auto-control-modal', [
                         'chamberId' => $record->chamber_id,
-                        'deviceCode' => $record->chamber->device_code,
                     ])),
             ])
             ->filters([

@@ -19,24 +19,24 @@ Route::get('/admin/logout', function () {
 
 // 自动控制 API 路由（供后台界面使用）
 Route::middleware(['web'])->prefix('api/auto-control')->group(function () {
-    Route::get('/{deviceCode}', [ChamberAutoControlController::class, 'getConfig'])
+    Route::get('/{chamberId}', [ChamberAutoControlController::class, 'getConfig'])
         ->name('web.auto-control.config');
 
-    Route::put('/{deviceCode}/{controlType}', [ChamberAutoControlController::class, 'updateConfig'])
+    Route::put('/{chamberId}/{controlType}', [ChamberAutoControlController::class, 'updateConfig'])
         ->name('web.auto-control.update');
 
-    Route::post('/{deviceCode}/{controlType}/control', [ChamberAutoControlController::class, 'manualControl'])
+    Route::post('/{chamberId}/{controlType}/control', [ChamberAutoControlController::class, 'manualControl'])
         ->name('web.auto-control.manual');
 
-    Route::get('/{deviceCode}/status', [ChamberAutoControlController::class, 'getDeviceStatus'])
+    Route::get('/{chamberId}/status', [ChamberAutoControlController::class, 'getDeviceStatus'])
         ->name('web.auto-control.status');
 
-    Route::get('/{deviceCode}/logs', [ChamberAutoControlController::class, 'getLogs'])
+    Route::get('/{chamberId}/logs', [ChamberAutoControlController::class, 'getLogs'])
         ->name('web.auto-control.logs');
 
-    Route::get('/{deviceCode}/{controlType}/schedules', [ChamberAutoControlController::class, 'getSchedules'])
+    Route::get('/{chamberId}/{controlType}/schedules', [ChamberAutoControlController::class, 'getSchedules'])
         ->name('web.auto-control.schedules');
 
-    Route::put('/{deviceCode}/{controlType}/schedules/{scheduleIndex}', [ChamberAutoControlController::class, 'updateSchedule'])
+    Route::put('/{chamberId}/{controlType}/schedules/{scheduleIndex}', [ChamberAutoControlController::class, 'updateSchedule'])
         ->name('web.auto-control.schedule.update');
 });

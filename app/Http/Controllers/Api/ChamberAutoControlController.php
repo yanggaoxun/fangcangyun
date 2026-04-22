@@ -85,13 +85,13 @@ class ChamberAutoControlController extends Controller
     /**
      * 获取方舱自动控制配置
      */
-    public function getConfig(string $deviceCode): JsonResponse
+    public function getConfig(int $chamberId): JsonResponse
     {
         if ($response = $this->checkPermission('chambers.auto_control.view')) {
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);
@@ -350,13 +350,13 @@ class ChamberAutoControlController extends Controller
     /**
      * 更新自动控制配置
      */
-    public function updateConfig(Request $request, string $deviceCode, string $controlType): JsonResponse
+    public function updateConfig(Request $request, int $chamberId, string $controlType): JsonResponse
     {
         if ($response = $this->checkPermission('chambers.auto_control.edit')) {
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);
@@ -570,7 +570,7 @@ class ChamberAutoControlController extends Controller
      */
     public function manualControl(
         Request $request,
-        string $deviceCode,
+        int $chamberId,
         string $controlType,
         ChamberAutoControlService $service
     ): JsonResponse {
@@ -578,7 +578,7 @@ class ChamberAutoControlController extends Controller
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);
@@ -623,13 +623,13 @@ class ChamberAutoControlController extends Controller
     /**
      * 获取设备状态
      */
-    public function getDeviceStatus(string $deviceCode): JsonResponse
+    public function getDeviceStatus(int $chamberId): JsonResponse
     {
         if ($response = $this->checkPermission('chambers.auto_control.view')) {
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);
@@ -658,13 +658,13 @@ class ChamberAutoControlController extends Controller
     /**
      * 获取控制日志
      */
-    public function getLogs(Request $request, string $deviceCode): JsonResponse
+    public function getLogs(Request $request, int $chamberId): JsonResponse
     {
         if ($response = $this->checkPermission('chambers.control_log.view')) {
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);
@@ -683,13 +683,13 @@ class ChamberAutoControlController extends Controller
     /**
      * 获取时段配置
      */
-    public function getSchedules(string $deviceCode, string $controlType): JsonResponse
+    public function getSchedules(int $chamberId, string $controlType): JsonResponse
     {
         if ($response = $this->checkPermission('chambers.auto_control.view')) {
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);
@@ -713,7 +713,7 @@ class ChamberAutoControlController extends Controller
      */
     public function updateSchedule(
         Request $request,
-        string $deviceCode,
+        int $chamberId,
         string $controlType,
         int $scheduleIndex
     ): JsonResponse {
@@ -721,7 +721,7 @@ class ChamberAutoControlController extends Controller
             return $response;
         }
 
-        $chamber = Chamber::where('device_code', $deviceCode)->first();
+        $chamber = Chamber::find($chamberId);
 
         if (! $chamber) {
             return response()->json(['error' => '方舱不存在'], 404);

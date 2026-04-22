@@ -4,7 +4,7 @@
         saving: false,
         error: null,
         activeTab: 'temperature',
-        deviceCode: '{{ $deviceCode }}',
+        chamberId: {{ $chamberId }},
         configs: {
             temperature: { 
                 mode: 'auto_schedule', 
@@ -178,7 +178,7 @@
             this.loading = true;
             this.error = null;
             try {
-                const response = await fetch(`/api/auto-control/${this.deviceCode}`);
+                const response = await fetch(`/api/auto-control/${this.chamberId}`);
                 if (!response.ok) throw new Error('获取配置失败');
                 const data = await response.json();
                 if (data.configs) {
@@ -263,7 +263,7 @@
                 
                 console.log('Saving config:', controlType, configToSave);
                 
-                const response = await fetch(`/api/auto-control/${this.deviceCode}/${controlType}`, {
+                const response = await fetch(`/api/auto-control/${this.chamberId}/${controlType}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
