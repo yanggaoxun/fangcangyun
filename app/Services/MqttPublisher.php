@@ -104,10 +104,19 @@ class MqttPublisher
      */
     public static function publish(string $topic, array $payload, int $qos = 1): void
     {
-        $client = self::getClient();
         $message = json_encode($payload);
 
-        $client->publish($topic, $message, $qos);
+        try {
+            $client = self::getClient();
+            $client->publish($topic, $message, $qos);
+        } catch (\PhpMqtt\Client\Exceptions\DataTransferException $e) {
+            // 连接可能已断开，重新创建连接并重试
+            self::disconnect();
+            self::$client = null;
+
+            $client = self::getClient();
+            $client->publish($topic, $message, $qos);
+        }
     }
 
     /**

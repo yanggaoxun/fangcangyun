@@ -196,6 +196,11 @@
                         }
                     });
                     
+                    // 温度控制强制使用 auto_schedule 模式
+                    if (this.configs.temperature) {
+                        this.configs.temperature.mode = 'auto_schedule';
+                    }
+
                     if (this.configs.temperature && this.configs.temperature.schedules) {
                         const enabledSchedules = this.configs.temperature.schedules.filter(s => s.is_enabled);
                         if (enabledSchedules.length > 1) {

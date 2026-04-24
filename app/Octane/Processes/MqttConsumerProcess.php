@@ -147,7 +147,6 @@ class MqttConsumerProcess
                 ['chamber_id' => $chamberId],
                 $recordData
             );
-            echo '1111';
             // 触发自动控制
             $this->processAutoControl($chamberId, $data);
 

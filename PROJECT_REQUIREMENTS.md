@@ -168,6 +168,52 @@
   - controlType可选值：temperature、h、umidification、fresh_air、exhaust、lighting
   - 支持配置项：mode、is_enabled、thresholds、cycle_params、linkage_config、delays、schedules
 
+- **MQTT 通信架构**（2026-04-23新增）：
+  - **Broker**：EMQX 5.8.6，端口 1883/8883/8083/18083
+  - **设备标识**：使用 `dev_devices.code` 作为 MQTT Topic 中的设备标识
+  - **认证方式**：username/password（测试环境使用统一账号 `device`/`device_password`）
+  - **Topic 设计**：
+    - `chambers/{deviceCode}/data` - 边缘设备数据上报（温度、湿度、CO2、设备状态）
+    - `chambers/{deviceCode}/command/manual` - 后台/APP 下发手动控制命令
+    - `chambers/{deviceCode}/config/auto` - 后台下发自动控制配置
+    - `chambers/{deviceCode}/ack` - 设备执行命令/配置后回复 ACK
+    - `chambers/{deviceCode}/status` - 设备状态上报
+    - `chambers/{deviceCode}/alarm` - 设备报警上报
+    - `server/status` - 服务器在线状态
+  - **QoS**：手动控制和配置同步使用 QoS 1（至少一次送达）
+
+- **手动控制下发流程**（2026-04-23新增）：
+  - **方案 A**：先发 MQTT → 成功后更新数据库
+  - **异步队列**：`SendMqttControlCommand` Job（database 驱动，重试 3 次）
+  - **流程**：
+    1. 用户点击开关（后台/API）
+    2. 查找方舱关联的边缘设备（`dev_devices.code`）
+    3. 发送 MQTT 命令到 `chambers/{deviceCode}/command/manual`
+    4. 等待设备 ACK
+    5. 设备执行后回复 ACK（`command_id`, `status`, `executed_actions`）
+    6. MQTT Consumer 收到 ACK，更新 `chambers_control_logs.ack_status`
+    7. 数据库更新（`chambers_monitor` 表记录设备状态）
+  - **失败处理**：MQTT 发送失败则数据库不更新，返回错误；Job 自动重试 3 次
+
+- **自动控制配置同步流程**（2026-04-23新增）：
+  - **触发时机**：保存自动控制配置后自动同步到边缘设备
+  - **异步队列**：`SendMqttAutoConfig` Job
+  - **配置组装**（根据 mode 动态生成）：
+    - `auto_schedule` 模式：包含 `schedules` 数组（时段配置）
+    - `auto_threshold` 模式：包含 `threshold` 对象（upper/lower/sensor）
+    - `auto_cycle` 模式：包含 `cycle` 对象（run_duration/run_unit/stop_duration/stop_unit）
+  - **流程**：
+    1. 用户保存自动控制配置
+    2. 数据库更新配置和时段数据
+    3. 组装完整配置（基础配置 + mode 对应的详细配置）
+    4. 发送 MQTT 到 `chambers/{deviceCode}/config/auto`
+    5. 设备收到配置，保存到本地 JSON 文件
+    6. 设备回复 ACK（`command_id` 作为 `config_id`，`status`）
+    7. MQTT Consumer 更新 `chambers_control_logs.ack_status`
+  - **控制模式规则**：
+    - **temperature**：固定为 `auto_schedule` 模式（界面上无模式选择）
+    - **humidity/fresh_air/exhaust/lighting**：支持 `auto_schedule`/`auto_threshold`/`auto_cycle` 三种模式
+
 ### 5. 设备控制模块
 **功能描述**：管理方舱内的自动化设备
 
@@ -282,6 +328,21 @@
 - 数据流转：前端配置 → API验证 → 数据库更新 → 返回保存成功通知
 - 前端使用Filament原生通知：`new FilamentNotification().title().success().body().send()`
 
+### 关键设计变更（2026-04-23）
+**MQTT 通信与队列架构**：
+- 新增 MQTT Broker（EMQX 5.8.6）：处理边缘设备与后端的实时通信
+- 新增队列 Job：
+  - `SendMqttControlCommand`：异步发送手动控制命令到边缘设备
+  - `SendMqttAutoConfig`：异步发送自动控制配置到边缘设备
+- 新增 `chambers_control_logs` 字段（2026-04-23）：
+  - `command_id`（VARCHAR 64）：MQTT 命令/配置的唯一标识
+  - `ack_status`（VARCHAR 20）：ACK 状态（pending/success/failed/timeout）
+  - `ack_at`（TIMESTAMP）：ACK 接收时间
+- `control_type` 字段类型变更（2026-04-23）：从 ENUM 改为 VARCHAR(50)，支持所有设备字段（含 four_way_valve 等）
+- 设备标识变更：使用 `dev_devices.code` 替代 `chambers.code` 作为 MQTT Topic 设备标识
+- 温度控制模式强制化：temperature 类型固定使用 `auto_schedule` 模式，界面上无模式选择
+- 配置数据动态组装：根据 mode（auto_schedule/auto_threshold/auto_cycle）自动组装对应的详细配置数据
+
 ## 部署架构
 
 ### Docker 服务组成
@@ -342,6 +403,25 @@
 - [x] **自动控制API接口**（获取配置、更新配置）
 - [x] **时段管理功能**（最多5个时段、互斥启用）
 - [x] **Filament原生通知**（保存成功/失败提示）
+- [x] **MQTT 通信架构**（2026-04-23）
+  - [x] EMQX Broker 部署（Docker 容器）
+  - [x] Topic 设计（data/command/config/ack/status/alarm）
+  - [x] 设备认证（username/password）
+  - [x] QoS 1 消息保证
+- [x] **手动控制 MQTT 下发**（2026-04-23）
+  - [x] 异步队列发送（`SendMqttControlCommand` Job）
+  - [x] 方案 A：先发 MQTT → 成功后更新数据库
+  - [x] 设备 ACK 处理（更新 ack_status）
+  - [x] 失败重试机制（3 次重试）
+- [x] **自动控制配置同步**（2026-04-23）
+  - [x] 保存配置后自动 MQTT 同步到边缘设备
+  - [x] 异步队列发送（`SendMqttAutoConfig` Job）
+  - [x] 配置动态组装（根据 mode 加载 schedules/threshold/cycle）
+  - [x] 设备配置保存（JSON 文件）+ ACK 回复
+- [x] **控制日志与 ACK 追踪**（2026-04-23）
+  - [x] `chambers_control_logs` 表记录命令/配置下发
+  - [x] `command_id` + `ack_status` + `ack_at` 字段
+  - [x] MQTT Consumer 处理设备 ACK
 
 ### ✅ 设备管理
 - [x] 设备CRUD操作
@@ -408,6 +488,27 @@
   - 实时状态同步和通知反馈
 - **API扩展**：新增 `/api/v1/chambers/{deviceCode}/devices/*` 系列接口
 
+### 2026-04-23 MQTT 通信与设备控制升级
+- **新增功能**：
+  - EMQX MQTT Broker 部署（Docker 容器，端口 1883/8883/8083/18083）
+  - 手动控制 MQTT 下发：后台/API 点击开关 → 队列异步发送 → 设备执行 → ACK 回复
+  - 自动控制配置同步：保存配置 → 动态组装（根据 mode）→ MQTT 发送 → 设备保存 JSON → ACK 回复
+  - 设备模拟器：PHP/Python 双版本，支持命令接收、配置保存、ACK 回复
+  - 控制日志追踪：`chambers_control_logs` 表记录所有命令/配置下发及 ACK 状态
+- **数据库变更**：
+  - `chambers_control_logs` 新增字段：`command_id`（VARCHAR 64）、`ack_status`（VARCHAR 20）、`ack_at`（TIMESTAMP）
+  - `chambers_control_logs.control_type`：ENUM 改为 VARCHAR(50)，支持所有设备字段
+- **架构变更**：
+  - 设备标识从 `chambers.code` 改为 `dev_devices.code`
+  - 统一使用 `device`/`device_password` 作为 MQTT 认证账号（测试环境）
+  - 温度控制模式强制化：固定为 `auto_schedule`，界面上无模式选择
+- **队列 Job**：
+  - `SendMqttControlCommand`：发送手动控制命令，失败重试 3 次
+  - `SendMqttAutoConfig`：发送自动控制配置，失败重试 3 次
+- **开发规范**：
+  - 方案 A：先发 MQTT → 成功后更新数据库
+  - 设备状态持久化：模拟器维护本地设备状态，上报真实状态
+
 ### 2025-03-21 系统基础功能完成
 - 完成基地、方舱、菌种、批次、设备、告警等核心模块
 - 实现库存管理和批次创建逻辑
@@ -416,13 +517,15 @@
 
 ## 当前状态
 ✅ **已完成**：所有核心功能模块已实现，系统可正常运行
-✅ **数据库**：所有表结构已创建，关系已建立
-✅ **管理界面**：Filament后台管理界面完整实现
-✅ **基础功能**：CRUD操作、搜索筛选、状态管理
-✅ **业务逻辑**：库存扣减、数据接收、状态流转
-✅ **容器化**：Docker环境配置完成，支持一键启动
-✅ **API接口**：环境数据接收API、设备控制API、自动控制API已实现
-✅ **自动控制**：5种控制类型（温度、加湿、新风、排风、光照）自动控制功能已实现
-✅ **开发规范**：保存操作通知规范已更新至 CLAUDE.md
+data**数据库**：所有表结构已创建，关系已建立
+data**管理界面**：Filament后台管理界面完整实现
+data**基础功能**：CRUD操作、搜索筛选、状态管理
+data**业务逻辑**：库存扣减、数据接收、状态流转
+data**容器化**：Docker环境配置完成，支持一键启动
+data**API接口**：环境数据接收API、设备控制API、自动控制API已实现
+data**自动控制**：5种控制类型（温度、加湿、新风、排风、光照）自动控制功能已实现
+data**MQTT通信**：EMQX Broker部署，支持实时设备控制与配置同步
+data**队列系统**：手动控制/自动配置异步下发，支持失败重试和ACK追踪
+data**开发规范**：保存操作通知规范已更新至 CLAUDE.md
 
 系统目前已具备投入使用的条件，可以开始录入基地、方舱、菌种等基础数据进行实际管理。

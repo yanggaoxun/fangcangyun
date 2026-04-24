@@ -56,15 +56,12 @@ class ChamberControlConfig extends Model
         'fresh_air' => '新风',
         'exhaust' => '排风',
         'lighting' => '光照',
-        'inner_circulation' => '内循环',
     ];
 
     /**
      * 模式常量
      */
     const MODES = [
-        'off' => '关闭',
-        'manual' => '手动控制',
         'auto_cycle' => '自动-启停循环',
         'auto_threshold' => '自动-上下限',
         'auto_schedule' => '自动-时间段',
@@ -115,7 +112,7 @@ class ChamberControlConfig extends Model
         return self::firstOrCreate(
             ['chamber_id' => $chamberId, 'control_type' => $controlType],
             [
-                'mode' => 'off',
+                'mode' => 'auto_schedule',
                 'is_enabled' => false,
                 'cycle_run_duration' => 30,
                 'cycle_run_unit' => 'minutes',

@@ -415,6 +415,11 @@ class ChamberAutoControlController extends Controller
         ];
         $validated['mode'] = $modeMap[$validated['mode']] ?? $validated['mode'];
 
+        // 温度控制强制使用 auto_schedule 模式
+        if ($controlType === 'temperature') {
+            $validated['mode'] = 'auto_schedule';
+        }
+
         // 提取并移除 schedules 从 validated 数据
         $schedules = $validated['schedules'] ?? null;
         unset($validated['schedules']);
@@ -559,6 +564,37 @@ class ChamberAutoControlController extends Controller
             }
         }
 
+        // 组装完整配置数据（根据模式包含不同的详细配置）
+        $configData = $config->fresh()->toArray();
+
+        switch ($configData['mode']) {
+            case 'auto_schedule':
+                $schedules = ChamberSchedule::where('chamber_id', $chamber->id)
+                    ->where('control_type', $dbControlType)
+                    ->get()
+                    ->toArray();
+                $configData['schedules'] = $schedules;
+                break;
+            /*        
+            case 'auto_threshold':
+                $configData['threshold'] = [
+                    'upper' => $configData['threshold_upper'],
+                    'lower' => $configData['threshold_lower'],
+                    'sensor' => $configData['threshold_sensor'],
+                ];
+                break;
+
+            case 'auto_cycle':
+                $configData['cycle'] = [
+                    'run_duration' => $configData['cycle_run_duration'],
+                    'run_unit' => $configData['cycle_run_unit'],
+                    'stop_duration' => $configData['cycle_stop_duration'],
+                    'stop_unit' => $configData['cycle_stop_unit'],
+                ];
+                break;
+            */
+        }
+
         // 查找边缘设备并异步发送配置同步
         $devDevice = $chamber->devices()->first();
         if ($devDevice && $devDevice->code) {
@@ -566,7 +602,7 @@ class ChamberAutoControlController extends Controller
                 chamberId: $chamber->id,
                 deviceCode: $devDevice->code,
                 controlType: $controlType,
-                config: $config->fresh()->toArray()
+                config: $configData
             );
         }
 
