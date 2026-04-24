@@ -575,7 +575,7 @@ class ChamberAutoControlController extends Controller
                     ->toArray();
                 $configData['schedules'] = $schedules;
                 break;
-            /*        
+                  
             case 'auto_threshold':
                 $configData['threshold'] = [
                     'upper' => $configData['threshold_upper'],
@@ -592,7 +592,7 @@ class ChamberAutoControlController extends Controller
                     'stop_unit' => $configData['cycle_stop_unit'],
                 ];
                 break;
-            */
+            
         }
 
         // 查找边缘设备并异步发送配置同步
