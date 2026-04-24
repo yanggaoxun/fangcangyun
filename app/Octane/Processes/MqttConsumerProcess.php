@@ -28,7 +28,7 @@ class MqttConsumerProcess
         $client = new MqttClient(
             $config['broker'],
             $config['port'],
-            $config['client_id']
+            $config['client_id'].'_consumer_'.getmypid().'_'.uniqid()
         );
 
         try {
