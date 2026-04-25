@@ -4,6 +4,7 @@ namespace App\Octane\Processes;
 
 use App\Models\ChamberManualControl;
 use App\Models\DevDevice;
+use App\Models\SysAlert;
 use App\Services\ChamberAutoControlService;
 use PhpMqtt\Client\ConnectionSettings;
 use PhpMqtt\Client\MqttClient;
@@ -167,18 +168,44 @@ class MqttConsumerProcess
             }
 
             preg_match('/chambers\/(.+)\/status/', $topic, $matches);
-            $chamberCode = $matches[1] ?? null;
+            $deviceCode = $matches[1] ?? null;
 
-            if (! $chamberCode) {
+            if (! $deviceCode) {
                 return;
             }
 
-            \Log::info('Device status received', [
-                'chamber' => $chamberCode,
-                'status' => $data,
-            ]);
+            // 通过 dev_devices.code 查找设备
+            $device = DevDevice::where('code', $deviceCode)->first();
+            if (! $device) {
+                \Log::warning("Device not found in dev_devices: {$deviceCode}");
 
-            // TODO: 更新设备在线状态、记录心跳时间等
+                return;
+            }
+
+            $chamberId = $device->chamber_id;
+            if (! $chamberId) {
+                \Log::warning("Device {$deviceCode} has no chamber_id");
+
+                return;
+            }
+
+            $isOnline = $data['online'] ?? true;
+            $heartbeatAt = $data['timestamp'] ?? now();
+
+            // 更新设备在线状态
+            ChamberManualControl::updateOrCreate(
+                ['chamber_id' => $chamberId],
+                [
+                    'is_online' => $isOnline,
+                    'last_heartbeat_at' => $heartbeatAt,
+                ]
+            );
+
+            \Log::info('Device status updated', [
+                'device' => $deviceCode,
+                'chamber_id' => $chamberId,
+                'is_online' => $isOnline,
+            ]);
 
         } catch (\Exception $e) {
             \Log::error('MQTT status processing error: '.$e->getMessage());
@@ -194,9 +221,17 @@ class MqttConsumerProcess
             }
 
             preg_match('/chambers\/(.+)\/ack/', $topic, $matches);
-            $chamberCode = $matches[1] ?? null;
+            $deviceCode = $matches[1] ?? null;
 
-            if (! $chamberCode) {
+            if (! $deviceCode) {
+                return;
+            }
+
+            // 通过 dev_devices.code 验证设备是否存在
+            $device = DevDevice::where('code', $deviceCode)->first();
+            if (! $device) {
+                \Log::warning("Device not found in dev_devices: {$deviceCode}");
+
                 return;
             }
 
@@ -204,7 +239,7 @@ class MqttConsumerProcess
             $status = $data['status'] ?? 'unknown';
 
             \Log::info('Command ACK received', [
-                'chamber' => $chamberCode,
+                'device' => $deviceCode,
                 'command_id' => $commandId,
                 'status' => $status,
             ]);
@@ -228,18 +263,60 @@ class MqttConsumerProcess
             }
 
             preg_match('/chambers\/(.+)\/alarm/', $topic, $matches);
-            $chamberCode = $matches[1] ?? null;
+            $deviceCode = $matches[1] ?? null;
 
-            if (! $chamberCode) {
+            if (! $deviceCode) {
                 return;
             }
 
-            \Log::warning('Device alarm received', [
-                'chamber' => $chamberCode,
-                'alarm' => $data,
-            ]);
+            // 通过 dev_devices.code 查找设备
+            $device = DevDevice::where('code', $deviceCode)->first();
+            if (! $device) {
+                \Log::warning("Device not found in dev_devices: {$deviceCode}");
 
-            // TODO: 创建报警记录、发送通知等
+                return;
+            }
+
+            $chamberId = $device->chamber_id;
+            if (! $chamberId) {
+                \Log::warning("Device {$deviceCode} has no chamber_id");
+
+                return;
+            }
+
+            $alarmType = $data['type'] ?? 'device_error';
+            $level = $data['level'] ?? 'warning';
+            $title = $data['title'] ?? '设备报警';
+            $messageText = $data['message'] ?? json_encode($data);
+            $triggerValue = $data['trigger_value'] ?? null;
+            $thresholdValue = $data['threshold_value'] ?? null;
+
+            // 创建报警记录
+            try {
+                SysAlert::create([
+                    'chamber_id' => $chamberId,
+                    'type' => $alarmType,
+                    'level' => $level,
+                    'title' => $title,
+                    'message' => $messageText,
+                    'trigger_value' => $triggerValue,
+                    'threshold_value' => $thresholdValue,
+                    'is_acknowledged' => false,
+                    'is_resolved' => false,
+                ]);
+                
+                \Log::warning('Alarm record created', [
+                    'device' => $deviceCode,
+                    'chamber_id' => $chamberId,
+                    'type' => $alarmType,
+                    'level' => $level,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to create alarm record: ' . $e->getMessage(), [
+                    'chamber_id' => $chamberId,
+                    'type' => $alarmType,
+                ]);
+            }
 
         } catch (\Exception $e) {
             \Log::error('MQTT alarm processing error: '.$e->getMessage());

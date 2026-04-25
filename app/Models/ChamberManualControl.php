@@ -37,6 +37,8 @@ class ChamberManualControl extends Model
         'temperature_setting',
         'humidity_setting',
         'light_intensity_setting',
+        'is_online',
+        'last_heartbeat_at',
     ];
 
     protected $casts = [
@@ -62,6 +64,9 @@ class ChamberManualControl extends Model
         'temperature_setting' => 'decimal:2',
         'humidity_setting' => 'decimal:2',
         'light_intensity_setting' => 'integer',
+        // 在线状态
+        'is_online' => 'boolean',
+        'last_heartbeat_at' => 'datetime',
     ];
 
     public function chamber(): BelongsTo

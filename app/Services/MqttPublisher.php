@@ -42,8 +42,10 @@ class MqttPublisher
 
     /**
      * 发布手动控制命令
+     *
+     * @param string $deviceCode 设备编码 (dev_devices.code)
      */
-    public static function publishManualControl(string $chamberCode, array $actions, ?int $overrideMinutes = null): string
+    public static function publishManualControl(string $deviceCode, array $actions, ?int $overrideMinutes = null): string
     {
         $commandId = 'cmd_'.uniqid();
 
@@ -57,15 +59,17 @@ class MqttPublisher
             $payload['override_minutes'] = $overrideMinutes;
         }
 
-        self::publish("chambers/{$chamberCode}/command/manual", $payload);
+        self::publish("chambers/{$deviceCode}/command/manual", $payload);
 
         return $commandId;
     }
 
     /**
      * 发布自动控制配置
+     *
+     * @param string $deviceCode 设备编码 (dev_devices.code)
      */
-    public static function publishAutoConfig(string $chamberCode, string $controlType, array $config): string
+    public static function publishAutoConfig(string $deviceCode, string $controlType, array $config): string
     {
         $configId = 'cfg_'.uniqid();
 
@@ -76,15 +80,17 @@ class MqttPublisher
             'config' => $config,
         ];
 
-        self::publish("chambers/{$chamberCode}/config/auto", $payload);
+        self::publish("chambers/{$deviceCode}/config/auto", $payload);
 
         return $configId;
     }
 
     /**
      * 发布完整配置
+     *
+     * @param string $deviceCode 设备编码 (dev_devices.code)
      */
-    public static function publishFullConfig(string $chamberCode, array $configs): string
+    public static function publishFullConfig(string $deviceCode, array $configs): string
     {
         $configId = 'cfg_'.uniqid();
 
@@ -94,7 +100,7 @@ class MqttPublisher
             'configs' => $configs,
         ];
 
-        self::publish("chambers/{$chamberCode}/config/full", $payload);
+        self::publish("chambers/{$deviceCode}/config/full", $payload);
 
         return $configId;
     }
