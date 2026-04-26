@@ -7,17 +7,9 @@ use PhpMqtt\Client\MqttClient;
 
 class MqttPublisher
 {
-    private static ?MqttClient $client = null;
-
-    public static function getClient(): MqttClient
-    {
-        if (self::$client === null || ! self::$client->isConnected()) {
-            self::$client = self::createClient();
-        }
-
-        return self::$client;
-    }
-
+    /**
+     * 创建新的 MQTT 客户端连接（短连接模式）
+     */
     protected static function createClient(): MqttClient
     {
         $config = config('mqtt');
@@ -29,10 +21,13 @@ class MqttPublisher
             ->setUsername($config['username'])
             ->setPassword($config['password']);
 
+        // 每次创建唯一 client_id，避免冲突
+        $clientId = $config['client_id'].'_pub_'.uniqid();
+
         $client = new MqttClient(
             $config['broker'],
             $config['port'],
-            $config['client_id'].'_publisher'
+            $clientId
         );
 
         $client->connect($connectionSettings, true);
@@ -106,32 +101,22 @@ class MqttPublisher
     }
 
     /**
-     * 通用发布方法
+     * 通用发布方法（短连接模式）
+     * 每次发布新建连接，发送后立即断开，避免长连接状态问题
      */
     public static function publish(string $topic, array $payload, int $qos = 1): void
     {
         $message = json_encode($payload);
+        $client = null;
 
         try {
-            $client = self::getClient();
+            $client = self::createClient();
             $client->publish($topic, $message, $qos);
-        } catch (\PhpMqtt\Client\Exceptions\DataTransferException $e) {
-            // 连接可能已断开，重新创建连接并重试
-            self::disconnect();
-            self::$client = null;
-
-            $client = self::getClient();
-            $client->publish($topic, $message, $qos);
-        }
-    }
-
-    /**
-     * 断开连接
-     */
-    public static function disconnect(): void
-    {
-        if (self::$client !== null && self::$client->isConnected()) {
-            self::$client->disconnect();
+        } finally {
+            // 确保连接被关闭，避免连接泄漏
+            if ($client !== null && $client->isConnected()) {
+                $client->disconnect();
+            }
         }
     }
 }
