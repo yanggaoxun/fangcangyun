@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Chamber;
 use App\Models\ChamberControlConfig;
-use App\Models\ChamberControlState;
 use App\Models\ChamberManualControl;
 use App\Models\ChamberSchedule;
 use Illuminate\Http\JsonResponse;
@@ -77,10 +76,6 @@ class ChamberControlApiController extends Controller
                 ]);
             }
 
-            $state = ChamberControlState::where('chamber_id', $chamber->id)
-                ->where('control_type', $dbType)
-                ->first();
-
             $configs[$key] = [
                 'mode' => $config->mode,
                 'is_enabled' => $config->is_enabled,
@@ -95,8 +90,6 @@ class ChamberControlApiController extends Controller
                 'delay_stop_cycle' => $config->delay_stop_cycle,
                 'inner_cycle_run' => $config->inner_cycle_run,
                 'inner_cycle_stop' => $config->inner_cycle_stop,
-                'current_state' => $state?->current_state ?? false,
-                'current_mode' => $state?->current_mode ?? 'auto_schedule',
                 'schedules_count' => $config->schedules()->count(),
             ];
         }
@@ -291,18 +284,21 @@ class ChamberControlApiController extends Controller
             return $response;
         }
 
-        $devices = [];
-        foreach (self::CONTROL_TYPE_MAP as $key => $dbType) {
-            $state = ChamberControlState::where('chamber_id', $chamber->id)
-                ->where('control_type', $dbType)
-                ->first();
+        $record = ChamberManualControl::where('chamber_id', $chamber->id)
+            ->latest('recorded_at')
+            ->first();
 
-            $devices[$key] = [
-                'current_state' => $state?->current_state ?? false,
-                'current_mode' => $state?->current_mode ?? 'auto_schedule',
-                'last_switch_at' => $state?->last_switch_at,
-                'is_manual_override' => $state?->is_manual_override ?? false,
-                'override_until' => $state?->override_until,
+        $devices = [];
+        $deviceFields = [
+            'inner_circulation', 'cooling', 'heating', 'fan',
+            'four_way_valve', 'fresh_air', 'humidification',
+            'lighting_supplement', 'lighting',
+        ];
+
+        foreach ($deviceFields as $field) {
+            $devices[$field] = [
+                'current_state' => $record?->$field ?? false,
+                'last_updated' => $record?->recorded_at?->toIso8601String(),
             ];
         }
 
@@ -313,6 +309,8 @@ class ChamberControlApiController extends Controller
                 'chamber_name' => $chamber->name,
                 'chamber_code' => $chamber->code,
                 'devices' => $devices,
+                'is_online' => $record?->is_online ?? false,
+                'last_heartbeat_at' => $record?->last_heartbeat_at?->toIso8601String(),
             ],
         ]);
     }

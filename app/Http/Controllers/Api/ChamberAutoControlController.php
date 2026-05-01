@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Chamber;
 use App\Models\ChamberControlConfig;
 use App\Models\ChamberControlLog;
-use App\Models\ChamberControlState;
 use App\Models\ChamberSchedule;
-use App\Services\ChamberAutoControlService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -104,15 +102,12 @@ class ChamberAutoControlController extends Controller
         foreach ($apiControlTypes as $apiType) {
             $dbType = $this->toDbControlType($apiType);
             ChamberControlConfig::getOrCreate($chamber->id, $dbType);
-            ChamberControlState::getOrCreate($chamber->id, $dbType);
         }
 
         $configs = ChamberControlConfig::where('chamber_id', $chamber->id)->get();
-        $states = ChamberControlState::where('chamber_id', $chamber->id)->get();
 
         $result = [];
         foreach ($configs as $config) {
-            $state = $states->firstWhere('control_type', $config->control_type);
             $apiType = $this->toApiControlType($config->control_type);
 
             // 转换模式名称为前端格式
@@ -125,9 +120,6 @@ class ChamberAutoControlController extends Controller
             $configData = [
                 'mode' => $modeMap[$config->mode] ?? $config->mode,
                 'is_enabled' => $config->is_enabled,
-                'current_state' => $state?->current_state ?? false,
-                'current_mode' => $state?->current_mode ?? 'auto_schedule',
-                'is_manual_override' => $state?->is_manual_override ?? false,
                 'threshold_upper' => $config->threshold_upper,
                 'threshold_lower' => $config->threshold_lower,
                 'cycle_run_duration' => $config->cycle_run_duration,
@@ -610,12 +602,12 @@ class ChamberAutoControlController extends Controller
 
     /**
      * 手动控制设备
+     * 直接发送 MQTT 命令到边缘设备
      */
     public function manualControl(
         Request $request,
         int $chamberId,
-        string $controlType,
-        ChamberAutoControlService $service
+        string $controlType
     ): JsonResponse {
         if ($response = $this->checkPermission('chambers.manual_control.view')) {
             return $response;
@@ -629,32 +621,32 @@ class ChamberAutoControlController extends Controller
 
         $validated = $request->validate([
             'action' => 'required|in:turn_on,turn_off',
-            'override_minutes' => 'nullable|integer|min:1',
+            'device' => 'required|string',
         ]);
 
-        $dbControlType = $this->toDbControlType($controlType);
-        $config = ChamberControlConfig::getOrCreate($chamber->id, $dbControlType);
-
-        if (! $config->is_enabled) {
+        // 查找关联的边缘设备
+        $devDevice = $chamber->devices()->first();
+        if (! $devDevice || ! $devDevice->code) {
             return response()->json([
-                'error' => '该设备自动控制已禁用，无法手动控制',
-                'message' => '请先启用自动控制',
-            ], 400);
+                'error' => '未找到该方舱的边缘设备',
+            ], 404);
         }
 
         try {
-            $service->manualControl(
+            // 使用队列异步发送 MQTT 命令
+            $actions = [$validated['device'] => $validated['action'] === 'turn_on'];
+            \App\Jobs\SendMqttControlCommand::dispatch(
                 chamberId: $chamber->id,
-                controlType: $dbControlType,
-                turnOn: $validated['action'] === 'turn_on',
+                deviceCode: $devDevice->code,
+                actions: $actions,
                 userId: auth()->id(),
-                overrideMinutes: $validated['override_minutes'] ?? null
             );
 
             return response()->json([
-                'message' => '控制指令已执行',
+                'message' => '控制命令已下发到边缘设备',
                 'action' => $validated['action'],
                 'control_type' => $controlType,
+                'device' => $validated['device'],
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -664,7 +656,8 @@ class ChamberAutoControlController extends Controller
     }
 
     /**
-     * 获取设备状态
+     * 获取设备实时状态
+     * 从监控表中获取最新的设备状态
      */
     public function getDeviceStatus(int $chamberId): JsonResponse
     {
@@ -678,16 +671,21 @@ class ChamberAutoControlController extends Controller
             return response()->json(['error' => '方舱不存在'], 404);
         }
 
-        $states = ChamberControlState::where('chamber_id', $chamber->id)->get();
+        $record = \App\Models\ChamberManualControl::where('chamber_id', $chamber->id)
+            ->latest('recorded_at')
+            ->first();
 
         $result = [];
-        foreach ($states as $state) {
-            $result[$state->control_type] = [
-                'current_state' => $state->current_state,
-                'current_mode' => $state->current_mode,
-                'last_switch_at' => $state->last_switch_at?->toIso8601String(),
-                'is_manual_override' => $state->is_manual_override,
-                'override_until' => $state->override_until?->toIso8601String(),
+        $deviceFields = [
+            'inner_circulation', 'cooling', 'heating', 'fan',
+            'four_way_valve', 'fresh_air', 'humidification',
+            'lighting_supplement', 'lighting',
+        ];
+
+        foreach ($deviceFields as $field) {
+            $result[$field] = [
+                'current_state' => $record?->$field ?? false,
+                'last_updated' => $record?->recorded_at?->toIso8601String(),
             ];
         }
 
@@ -695,6 +693,8 @@ class ChamberAutoControlController extends Controller
             'chamber_id' => $chamber->id,
             'chamber_name' => $chamber->name,
             'devices' => $result,
+            'is_online' => $record?->is_online ?? false,
+            'last_heartbeat_at' => $record?->last_heartbeat_at?->toIso8601String(),
         ]);
     }
 

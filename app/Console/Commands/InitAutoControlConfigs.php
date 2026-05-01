@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Chamber;
 use App\Models\ChamberControlConfig;
-use App\Models\ChamberControlState;
 use Illuminate\Console\Command;
 
 class InitAutoControlConfigs extends Command
@@ -58,7 +57,6 @@ class InitAutoControlConfigs extends Command
     {
         foreach ($controlTypes as $controlType) {
             ChamberControlConfig::getOrCreate($chamber->id, $controlType);
-            ChamberControlState::getOrCreate($chamber->id, $controlType);
         }
     }
 }

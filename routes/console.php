@@ -8,5 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// 自动控制系统 - 每分钟执行一次检查
-Schedule::command('auto-control:run')->everyMinute();
+// 自动控制由边缘设备通过 auto_control.py 执行，服务器不参与定时控制

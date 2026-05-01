@@ -78,12 +78,6 @@ class ChamberControlConfig extends Model
             ->where('control_type', $this->control_type);
     }
 
-    public function state(): BelongsTo
-    {
-        return $this->belongsTo(ChamberControlState::class, 'chamber_id', 'chamber_id')
-            ->where('control_type', $this->control_type);
-    }
-
     /**
      * 是否自动模式
      */

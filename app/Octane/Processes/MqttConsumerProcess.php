@@ -5,7 +5,6 @@ namespace App\Octane\Processes;
 use App\Models\ChamberManualControl;
 use App\Models\DevDevice;
 use App\Models\SysAlert;
-use App\Services\ChamberAutoControlService;
 use PhpMqtt\Client\ConnectionSettings;
 use PhpMqtt\Client\MqttClient;
 
@@ -148,8 +147,8 @@ class MqttConsumerProcess
                 ['chamber_id' => $chamberId],
                 $recordData
             );
-            // 触发自动控制
-            $this->processAutoControl($chamberId, $data);
+            // 自动控制逻辑由边缘设备通过 auto_control.py 自行执行
+            // 服务器仅负责存储数据，不参与控制决策
 
         } catch (\Exception $e) {
             \Log::error('MQTT data processing error: '.$e->getMessage(), [
@@ -304,7 +303,7 @@ class MqttConsumerProcess
                     'is_acknowledged' => false,
                     'is_resolved' => false,
                 ]);
-                
+
                 \Log::warning('Alarm record created', [
                     'device' => $deviceCode,
                     'chamber_id' => $chamberId,
@@ -312,7 +311,7 @@ class MqttConsumerProcess
                     'level' => $level,
                 ]);
             } catch (\Exception $e) {
-                \Log::error('Failed to create alarm record: ' . $e->getMessage(), [
+                \Log::error('Failed to create alarm record: '.$e->getMessage(), [
                     'chamber_id' => $chamberId,
                     'type' => $alarmType,
                 ]);
@@ -321,103 +320,5 @@ class MqttConsumerProcess
         } catch (\Exception $e) {
             \Log::error('MQTT alarm processing error: '.$e->getMessage());
         }
-    }
-
-    protected function processAutoControl(int $chamberId, array $data): void
-    {
-        try {
-            $service = new ChamberAutoControlService;
-
-            // 检查每个控制类型是否需要自动调节
-            $controlTypes = ['temperature', 'humidity', 'fresh_air', 'exhaust', 'lighting'];
-
-            foreach ($controlTypes as $controlType) {
-                if (! isset($data[$controlType])) {
-                    continue;
-                }
-
-                $config = \App\Models\ChamberControlConfig::where('chamber_id', $chamberId)
-                    ->where('control_type', $controlType)
-                    ->where('is_enabled', true)
-                    ->first();
-
-                if (! $config) {
-                    continue;
-                }
-
-                // 根据控制模式处理
-                switch ($config->mode) {
-                    case 'auto_threshold':
-                        $this->processThresholdControl($chamberId, $controlType, $data[$controlType], $config);
-                        break;
-                    case 'auto_schedule':
-                        $this->processScheduleControl($chamberId, $controlType, $config);
-                        break;
-                    case 'auto_cycle':
-                        $this->processCycleControl($chamberId, $controlType, $config);
-                        break;
-                }
-            }
-
-        } catch (\Exception $e) {
-            \Log::error('Auto control processing error: '.$e->getMessage());
-        }
-    }
-
-    protected function processThresholdControl(int $chamberId, string $controlType, $currentValue, $config): void
-    {
-        if (! $config->threshold_upper || ! $config->threshold_lower) {
-            return;
-        }
-
-        $service = new ChamberAutoControlService;
-
-        if ($currentValue > $config->threshold_upper) {
-            // 超过上限，启动降温/除湿等
-            $service->manualControl($chamberId, $controlType, true);
-        } elseif ($currentValue < $config->threshold_lower) {
-            // 低于下限，启动加热/加湿等
-            $service->manualControl($chamberId, $controlType, true);
-        } else {
-            // 在范围内，关闭
-            $service->manualControl($chamberId, $controlType, false);
-        }
-    }
-
-    protected function processScheduleControl(int $chamberId, string $controlType, $config): void
-    {
-        $now = now();
-        $currentTime = $now->format('H:i:s');
-
-        $schedule = \App\Models\ChamberSchedule::where('chamber_id', $chamberId)
-            ->where('control_type', $controlType)
-            ->where('is_enabled', true)
-            ->where('start_time', '<=', $currentTime)
-            ->where('end_time', '>=', $currentTime)
-            ->first();
-
-        if (! $schedule) {
-            return;
-        }
-
-        $service = new ChamberAutoControlService;
-        $service->manualControl($chamberId, $controlType, true);
-    }
-
-    protected function processCycleControl(int $chamberId, string $controlType, $config): void
-    {
-        if (! $config->cycle_run_duration || ! $config->cycle_stop_duration) {
-            return;
-        }
-
-        // 简单的循环控制：根据当前时间判断运行还是停止
-        $totalCycle = $config->cycle_run_duration + $config->cycle_stop_duration;
-        $currentMinute = now()->minute;
-        $positionInCycle = $currentMinute % $totalCycle;
-
-        $service = new ChamberAutoControlService;
-        $shouldRun = $positionInCycle < $config->cycle_run_duration;
-
-        $service->manualControl($chamberId, $controlType, $shouldRun);
     }
 }

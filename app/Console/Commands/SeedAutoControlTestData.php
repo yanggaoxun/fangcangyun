@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Chamber;
 use App\Models\ChamberControlConfig;
 use App\Models\ChamberControlLog;
-use App\Models\ChamberControlState;
 use App\Models\ChamberSchedule;
 use Illuminate\Console\Command;
 
@@ -158,50 +157,8 @@ class SeedAutoControlTestData extends Command
     protected function generateStates($chamber)
     {
         $this->info('生成设备状态...');
-
-        $states = [
-            'temperature' => [
-                'current_state' => true,
-                'current_mode' => 'auto',
-                'is_manual_override' => false,
-            ],
-            'humidity' => [
-                'current_state' => false,
-                'current_mode' => 'auto',
-                'is_manual_override' => false,
-            ],
-            'fresh_air' => [
-                'current_state' => true,
-                'current_mode' => 'auto',
-                'is_manual_override' => false,
-            ],
-            'exhaust' => [
-                'current_state' => false,
-                'current_mode' => 'auto_schedule',
-                'is_manual_override' => false,
-            ],
-            'lighting' => [
-                'current_state' => true,
-                'current_mode' => 'auto',
-                'is_manual_override' => false,
-            ],
-        ];
-
-        foreach ($states as $controlType => $stateData) {
-            ChamberControlState::updateOrCreate(
-                [
-                    'chamber_id' => $chamber->id,
-                    'control_type' => $controlType,
-                ],
-                array_merge($stateData, [
-                    'last_switch_at' => now()->subMinutes(rand(1, 60)),
-                    'next_switch_at' => now()->addMinutes(rand(1, 30)),
-                    'override_until' => null,
-                ])
-            );
-        }
-
-        $this->info('  ✓ 设备状态已生成');
+        // 设备状态现在由边缘设备维护，服务器端不再存储
+        $this->info('  ℹ 设备状态由边缘设备维护，跳过生成');
     }
 
     protected function generateLogs($chamber, $count)
