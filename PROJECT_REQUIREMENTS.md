@@ -116,8 +116,8 @@
   - fan（风机）、four_way_valve（四通阀）、fresh_air（新风）
   - humidification（加湿）、lighting_supplement（补光）、lighting（照明）
 - `chamber_control_configs` 表（2025-04-07新增）：存储自动控制配置
-  - control_type：控制类型（temperature、h、umidification、fresh_air、exhaust、lighting）
-  - mode：控制模式（threshold、cycle、schedule、off、manual）
+  - control_type：控制类型（temperature、humidification、fresh_air、exhaust、lighting）
+  - mode：控制模式（threshold、cycle、schedule）
   - is_enabled：是否启用
   - threshold_upper/lower：阈值上下限
   - cycle_run/stop_duration：循环运行/停止时长

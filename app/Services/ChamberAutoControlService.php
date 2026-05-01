@@ -425,9 +425,9 @@ class ChamberAutoControlService
         $config = ChamberControlConfig::getOrCreate($chamberId, $controlType);
         $state = ChamberControlState::getOrCreate($chamberId, $controlType);
 
-        // 检查模式
-        if ($config->mode === 'off') {
-            throw new \RuntimeException('该设备已关闭，无法手动控制');
+        // 检查自动控制是否启用
+        if (! $config->is_enabled) {
+            throw new \RuntimeException('该设备自动控制已禁用，无法手动控制');
         }
 
         $deviceName = ChamberControlConfig::CONTROL_TYPES[$controlType] ?? $controlType;

@@ -72,7 +72,7 @@ class ChamberControlApiController extends Controller
                 $config = ChamberControlConfig::create([
                     'chamber_id' => $chamber->id,
                     'control_type' => $dbType,
-                    'mode' => $key === 'temperature' ? 'auto_schedule' : 'off',
+                    'mode' => $key === 'temperature' ? 'auto_schedule' : 'auto_threshold',
                     'is_enabled' => false,
                 ]);
             }
@@ -96,7 +96,7 @@ class ChamberControlApiController extends Controller
                 'inner_cycle_run' => $config->inner_cycle_run,
                 'inner_cycle_stop' => $config->inner_cycle_stop,
                 'current_state' => $state?->current_state ?? false,
-                'current_mode' => $state?->current_mode ?? 'off',
+                'current_mode' => $state?->current_mode ?? 'auto_schedule',
                 'schedules_count' => $config->schedules()->count(),
             ];
         }
@@ -131,7 +131,7 @@ class ChamberControlApiController extends Controller
         $dbType = self::CONTROL_TYPE_MAP[$controlType];
 
         $validator = Validator::make($request->all(), [
-            'mode' => 'required|in:off,manual,auto_cycle,auto_threshold,auto_schedule',
+            'mode' => 'required|in:auto_cycle,auto_threshold,auto_schedule',
             'is_enabled' => 'required|boolean',
             'threshold_upper' => 'nullable|numeric',
             'threshold_lower' => 'nullable|numeric',
@@ -299,7 +299,7 @@ class ChamberControlApiController extends Controller
 
             $devices[$key] = [
                 'current_state' => $state?->current_state ?? false,
-                'current_mode' => $state?->current_mode ?? 'off',
+                'current_mode' => $state?->current_mode ?? 'auto_schedule',
                 'last_switch_at' => $state?->last_switch_at,
                 'is_manual_override' => $state?->is_manual_override ?? false,
                 'override_until' => $state?->override_until,

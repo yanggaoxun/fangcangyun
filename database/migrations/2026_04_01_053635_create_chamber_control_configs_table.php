@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('chamber_id');
             $table->enum('control_type', ['temperature', 'humidity', 'fresh_air', 'exhaust', 'lighting', 'inner_circulation'])->comment('控制类型：温度/湿度/新风/排风/光照/内循环');
-            $table->enum('mode', ['off', 'manual', 'auto_cycle', 'auto_threshold', 'auto_schedule'])->default('off')->comment('模式：关闭/手动/自动循环/自动阈值/自动时段');
+            $table->enum('mode', ['auto_cycle', 'auto_threshold', 'auto_schedule'])->default('auto_schedule')->comment('模式：自动循环/自动阈值/自动时段');
             $table->boolean('is_enabled')->default(false)->comment('是否启用');
 
             // 启停循环模式配置

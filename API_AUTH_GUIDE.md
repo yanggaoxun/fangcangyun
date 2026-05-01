@@ -254,7 +254,7 @@ Content-Type: application/json
 }
 
 # controlType: temperature / humidification / fresh_air / exhaust / lighting
-# mode: off / manual / auto_cycle / auto_threshold / auto_schedule
+# mode: auto_cycle / auto_threshold / auto_schedule
 ```
 
 **获取设备实时状态：**

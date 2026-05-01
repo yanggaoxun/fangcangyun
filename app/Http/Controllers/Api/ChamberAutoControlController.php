@@ -120,15 +120,13 @@ class ChamberAutoControlController extends Controller
                 'auto_schedule' => 'schedule',
                 'auto_threshold' => 'threshold',
                 'auto_cycle' => 'cycle',
-                'off' => 'off',
-                'manual' => 'manual',
             ];
 
             $configData = [
                 'mode' => $modeMap[$config->mode] ?? $config->mode,
                 'is_enabled' => $config->is_enabled,
                 'current_state' => $state?->current_state ?? false,
-                'current_mode' => $state?->current_mode ?? 'off',
+                'current_mode' => $state?->current_mode ?? 'auto_schedule',
                 'is_manual_override' => $state?->is_manual_override ?? false,
                 'threshold_upper' => $config->threshold_upper,
                 'threshold_lower' => $config->threshold_lower,
@@ -367,7 +365,7 @@ class ChamberAutoControlController extends Controller
 
         try {
             $validated = $request->validate([
-                'mode' => 'required|in:auto_schedule,threshold,cycle,off,manual,schedule',
+                'mode' => 'required|in:auto_schedule,threshold,cycle,schedule',
                 'is_enabled' => 'boolean',
                 'threshold_upper' => 'nullable|numeric',
                 'threshold_lower' => 'nullable|numeric',
@@ -409,8 +407,6 @@ class ChamberAutoControlController extends Controller
             'auto_schedule' => 'auto_schedule',
             'threshold' => 'auto_threshold',
             'cycle' => 'auto_cycle',
-            'off' => 'off',
-            'manual' => 'manual',
             'schedule' => 'auto_schedule',
         ];
         $validated['mode'] = $modeMap[$validated['mode']] ?? $validated['mode'];
@@ -575,7 +571,7 @@ class ChamberAutoControlController extends Controller
                     ->toArray();
                 $configData['schedules'] = $schedules;
                 break;
-                  
+
             case 'auto_threshold':
                 $configData['threshold'] = [
                     'upper' => $configData['threshold_upper'],
@@ -592,7 +588,7 @@ class ChamberAutoControlController extends Controller
                     'stop_unit' => $configData['cycle_stop_unit'],
                 ];
                 break;
-            
+
         }
 
         // 查找边缘设备并异步发送配置同步
@@ -639,10 +635,10 @@ class ChamberAutoControlController extends Controller
         $dbControlType = $this->toDbControlType($controlType);
         $config = ChamberControlConfig::getOrCreate($chamber->id, $dbControlType);
 
-        if ($config->mode === 'off') {
+        if (! $config->is_enabled) {
             return response()->json([
-                'error' => '该设备已关闭，无法手动控制',
-                'message' => '请先开启设备或切换到手动/自动模式',
+                'error' => '该设备自动控制已禁用，无法手动控制',
+                'message' => '请先启用自动控制',
             ], 400);
         }
 

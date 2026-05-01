@@ -177,7 +177,7 @@ class SeedAutoControlTestData extends Command
             ],
             'exhaust' => [
                 'current_state' => false,
-                'current_mode' => 'off',
+                'current_mode' => 'auto_schedule',
                 'is_manual_override' => false,
             ],
             'lighting' => [
