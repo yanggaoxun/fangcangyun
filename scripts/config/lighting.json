@@ -1,0 +1,13 @@
+{
+  "config_id": "cfg_test_003",
+  "device_code": "CH003",
+  "control_type": "lighting",
+  "config": {
+    "mode": "auto_cycle",
+    "is_enabled": true,
+    "cycle_run_duration": 1,
+    "cycle_run_unit": "minutes",
+    "cycle_stop_duration": 1,
+    "cycle_stop_unit": "minutes"
+  }
+}

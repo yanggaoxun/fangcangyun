@@ -109,7 +109,7 @@
   - 批量设备控制接口
 
 **数据库表结构**：
-- `chamber_environment_data` 表：存储环境数据和设备状态（宽表设计）
+- `chambers_monitor` 表：存储环境数据和设备状态（由边缘设备上报）
 - **环境参数字段**：temperature（温度）、humidity（湿度）、co2_level（CO2浓度）、light_intensity（光照强度）、recorded_at（记录时间）、is_anomaly（是否异常）
 - **设备状态字段**（9个布尔值）：
   - inner_circulation（内循环）、cooling（制冷）、heating（制热）
@@ -271,11 +271,11 @@
 
 ### 环境数据与设备控制流
 1. 方舱设备通过API定期上传环境数据（含9个设备状态）
-2. 系统接收并存储到chamber_environment_data表
+2. 系统接收并存储到chambers_monitor表
 3. 后台管理界面显示：
    - 实时环境数据（只读）
    - 设备状态可视化面板（可控制）
-4. 用户在后台点击设备开关 → 更新数据库 → （待实现）下发指令到边缘服务器
+4. 用户在后台点击设备开关 → 下发 MQTT 命令到边缘设备 → 设备执行后上报状态 → 数据库存储
 5. 支持按基地、方舱、时间筛选查看
 
 ### 菌种库存流
@@ -295,11 +295,10 @@
 ### 核心数据表
 - `chambers_bases` 表：存储基地信息
 - `chambers_chambers` 表：存储方舱信息
-- `chambers_environment_data` 表：存储环境数据和设备状态
+- `chambers_monitor` 表：存储环境数据和设备状态（由边缘设备上报）
 - `chambers_control_configs` 表：存储自动控制配置
 - `chambers_schedules` 表：存储时段配置
-- `chambers_control_logs` 表：存储控制日志
-- `chambers_control_states` 表：存储控制状态
+- `chambers_control_logs` 表：存储控制日志（含 MQTT 命令 ACK 追踪）
 - `mush_strains` 表：存储菌种信息
 - `mush_batches` 表：存储菌包批次信息
 - `mush_stocks` 表：存储基地菌种库存
@@ -314,7 +313,7 @@
 
 ### 关键设计变更（2025-03-30）
 **环境数据表重构**：
-- 表名从 `environment_data` 改为 `chamber_environment_data`
+- 表名从 `environment_data` 改为 `chambers_monitor`
 - 采用宽表设计，一条记录包含完整的环境参数 + 9个设备状态
 - 便于查询最新状态：按 recorded_at 倒序取第一条
 - 删除独立的 `chamber_device_statuses` 表，简化数据模型
@@ -323,7 +322,7 @@
 **自动控制功能实现**：
 - 新增 `chamber_control_configs` 表：存储5种控制类型的配置（温度、加湿、新风、排风、光照）
 - 新增 `chamber_schedules` 表：存储时段配置，支持多时段管理
-- 控制模式支持：阈值控制、循环控制、定时控制、关闭、手动
+- 控制模式支持：阈值控制、循环控制、定时控制（3种自动控制模式）
 - 时段互斥机制：同一控制类型下只有一个时段可启用
 - 数据流转：前端配置 → API验证 → 数据库更新 → 返回保存成功通知
 - 前端使用Filament原生通知：`new FilamentNotification().title().success().body().send()`
@@ -356,6 +355,69 @@
 - 队列工作进程自动运行
 - 日志实时监控
 - 支持开发模式和生产模式切换
+
+## 权限管理 (RBAC)
+
+系统基于角色的访问控制（RBAC）实现权限管理。
+
+### 数据库表结构
+
+- **permissions** - 权限表
+  - `name`: 权限标识 (如: users.view, users.create)
+  - `label`: 权限名称 (如: 查看用户)
+  - `group`: 权限分组 (如: 用户管理)
+
+- **roles** - 角色表
+  - `name`: 角色标识 (如: super_admin)
+  - `label`: 角色名称 (如: 超级管理员)
+
+- **permission_role** - 角色-权限关联表
+- **role_user** - 用户-角色关联表
+
+### 预定义角色
+
+1. **超级管理员 (super_admin)**
+   - 拥有所有权限
+   - 可以管理角色和权限
+
+2. **系统管理员 (system_admin)**
+   - 拥有除角色/权限管理外的所有权限
+   - 只能分配基地管理员角色
+
+3. **基地管理员 (base_admin)**
+   - 只能查看和管理所属基地的数据
+   - 不能管理用户和角色
+
+### 主要权限列表
+
+- **用户管理**: users.view, users.create, users.edit, users.delete
+- **角色管理**: roles.view, roles.create, roles.edit, roles.delete
+- **基地管理**: bases.view, bases.create, bases.edit, bases.delete
+- **方舱管理**: chambers.view, chambers.create, chambers.edit, chambers.delete
+- **菌种管理**: strains.view, strains.create, strains.edit, strains.delete
+- **设备管理**: devices.view, devices.create, devices.edit, devices.delete
+- **环境监控**: environment.view, environment.create, environment.edit, environment.delete
+- **报警管理**: alerts.view, alerts.create, alerts.edit, alerts.delete
+
+### 使用方法
+
+```php
+// 检查权限
+if ($user->hasPermission('users.create')) {
+    // 可以创建用户
+}
+
+// 检查角色
+if ($user->hasRole('super_admin')) {
+    // 是超级管理员
+}
+
+// 在Resource中使用
+public static function canCreate(): bool
+{
+    return Auth::user()->hasPermission('users.create');
+}
+```
 
 ## 已完成功能清单
 
@@ -477,7 +539,7 @@
   - 代码已更新至 CLAUDE.md 规范文档
 
 ### 2025-03-30 设备控制功能升级
-- **数据库重构**：将设备状态从独立表 `chamber_device_statuses` 迁移到 `chamber_environment_data` 表
+- **数据库重构**：将设备状态从独立表 `chamber_device_statuses` 迁移到 `chambers_monitor` 表
 - **新增功能**：
   - 方舱监控页面可视化设备控制面板
   - 9个设备独立开关控制（内循环、制冷、制热、风机、四通阀、新风、加湿、补光、照明）
@@ -509,6 +571,20 @@
   - 方案 A：先发 MQTT → 成功后更新数据库
   - 设备状态持久化：模拟器维护本地设备状态，上报真实状态
 
+### 2026-05-01 架构简化与 GPIO 兼容性优化
+- **控制模式简化**：从5种模式（off/manual/threshold/cycle/schedule）简化为3种自动控制模式（threshold/cycle/schedule）
+- **删除服务器端自动控制逻辑**：
+  - 删除 `ChamberAutoControlService`（服务器端自动控制服务）
+  - 删除 `chambers_control_states` 表（控制状态由边缘设备维护）
+  - 删除 `AutoControlRun` 定时任务命令
+  - MQTT Consumer 不再处理自动控制逻辑
+- **自动控制执行方变更**：由服务器端定时执行 → 改为边缘设备通过 `auto_control.py` 根据配置自行执行
+- **GPIO 兼容性**：
+  - 支持 `gpiozero`（推荐，兼容 Pi 4/5）
+  - 支持 `RPi.GPIO`（旧版 Pi 3 兼容）
+  - 可配置 `pigpio` 后端（可选）
+- **传感器读取**：修复 `test.py` CRC 计算和数据解析错误
+
 ### 2025-03-21 系统基础功能完成
 - 完成基地、方舱、菌种、批次、设备、告警等核心模块
 - 实现库存管理和批次创建逻辑
@@ -517,15 +593,16 @@
 
 ## 当前状态
 ✅ **已完成**：所有核心功能模块已实现，系统可正常运行
-data**数据库**：所有表结构已创建，关系已建立
-data**管理界面**：Filament后台管理界面完整实现
-data**基础功能**：CRUD操作、搜索筛选、状态管理
-data**业务逻辑**：库存扣减、数据接收、状态流转
-data**容器化**：Docker环境配置完成，支持一键启动
-data**API接口**：环境数据接收API、设备控制API、自动控制API已实现
-data**自动控制**：5种控制类型（温度、加湿、新风、排风、光照）自动控制功能已实现
-data**MQTT通信**：EMQX Broker部署，支持实时设备控制与配置同步
-data**队列系统**：手动控制/自动配置异步下发，支持失败重试和ACK追踪
-data**开发规范**：保存操作通知规范已更新至 CLAUDE.md
+- **数据库**：所有表结构已创建，关系已建立
+- **管理界面**：Filament后台管理界面完整实现
+- **基础功能**：CRUD操作、搜索筛选、状态管理
+- **业务逻辑**：库存扣减、数据接收、状态流转
+- **容器化**：Docker环境配置完成，支持一键启动
+- **API接口**：环境数据接收API、设备控制API、自动控制API已实现
+- **自动控制**：5种控制类型配置功能已实现，由边缘设备执行控制逻辑
+- **MQTT通信**：EMQX Broker部署，支持实时设备控制与配置同步
+- **队列系统**：手动控制/自动配置异步下发，支持失败重试和ACK追踪
+- **GPIO兼容**：支持 gpiozero（Pi 4/5）和 RPi.GPIO（Pi 3）
+- **开发规范**：保存操作通知规范已更新至 CLAUDE.md
 
 系统目前已具备投入使用的条件，可以开始录入基地、方舱、菌种等基础数据进行实际管理。

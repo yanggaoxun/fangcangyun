@@ -1,0 +1,15 @@
+{
+  "device_code": "CH003",
+  "updated_at": "2026-04-29T05:54:30.193984",
+  "states": {
+    "inner_circulation": false,
+    "cooling": false,
+    "heating": false,
+    "fan": false,
+    "four_way_valve": false,
+    "fresh_air": false,
+    "humidification": false,
+    "lighting_supplement": false,
+    "lighting": true
+  }
+}

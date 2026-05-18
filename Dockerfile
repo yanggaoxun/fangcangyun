@@ -21,5 +21,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 RUN pecl install swoole \
     && docker-php-ext-enable swoole
 
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Set working directory
 WORKDIR /var/www/html
