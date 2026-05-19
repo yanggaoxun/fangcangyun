@@ -39,7 +39,7 @@ This is a Laravel 12 application with Filament 4.0 admin panel, containerized wi
 
 ### Development
 ```bash
-# Start all services (app, web, db) in Docker
+# Start all services (app, emqx) in Docker
 docker-compose up -d
 
 # Run development server with hot reload, queue worker, and log monitoring
@@ -71,8 +71,7 @@ php artisan migrate:rollback
 # Create a new migration
 php artisan make:migration create_table_name
 
-# Access MySQL console
-docker exec -it laravel_db mysql -uroot -padmin123 laravel
+# Database is external, no container access needed
 ```
 
 ### Filament Admin Panel
@@ -99,9 +98,8 @@ php artisan filament:upgrade
 ## Architecture Overview
 
 ### Service Architecture
-- **App Container**: PHP 8.2 with Laravel 12, runs on port 9000 internally
-- **Web Container**: Nginx reverse proxy, accessible at localhost:8084
-- **DB Container**: MySQL 8.0, accessible at localhost:3307
+- **App Container**: PHP 8.2 with Laravel 12, runs on port 8000
+- **MQTT Container**: EMQX Broker, ports 1883/18083
 
 ### Key Directories
 - `app/Admin/Resources/Chambers/`: 方舱管理（Bases, Chambers, Monitor）
@@ -121,7 +119,7 @@ The application uses Filament as the admin panel framework:
 - Default authentication with User model implementing `FilamentUser` interface
 
 ### Database Configuration
-- MySQL connection configured for Docker service 'db'
+- MySQL connection configured for external database
 - Database name: `laravel`
 - Credentials in `.env`: DB_USERNAME=root, DB_PASSWORD=admin123
 - Session, cache, and queue use database driver by default
@@ -131,4 +129,4 @@ The application uses Filament as the admin panel framework:
 2. Source code is volume-mounted for live editing
 3. Composer scripts handle common development tasks
 4. Filament provides rapid admin interface development
-5. All services communicate through Docker network 'laravel'
+5. All services communicate through Docker network 'fangcangyun'

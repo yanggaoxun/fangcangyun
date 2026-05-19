@@ -259,12 +259,6 @@ services:
   app:        # Laravel + Octane (Swoole)
     ports:
       - "8000:8000"
-  web:        # Nginx 反向代理
-    ports:
-      - "8084:80"
-  db:         # MySQL 8.0
-    ports:
-      - "3307:3306"
   emqx:       # MQTT Broker
     ports:
       - "1883:1883"    # MQTT
@@ -276,7 +270,7 @@ services:
 
 ```env
 DB_CONNECTION=mysql
-DB_HOST=db
+DB_HOST=39.102.54.120
 DB_PORT=3306
 DB_DATABASE=laravel
 DB_USERNAME=root
@@ -284,7 +278,7 @@ DB_PASSWORD=admin123
 
 MQTT_BROKER=emqx
 MQTT_PORT=1883
-MQTT_USERNAME=laravel
+MQTT_USERNAME=fangcangyun
 MQTT_PASSWORD=admin123
 
 QUEUE_CONNECTION=database
@@ -495,7 +489,7 @@ class SendMqttNewJob implements ShouldQueue
 
 ### 开发环境
 
-**前提**：以下命令在 `laravel_app` 容器内执行（`docker compose exec app bash` 进入）
+**前提**：以下命令在 `fangcangyun_app` 容器内执行（`docker compose exec app bash` 进入）
 
 ```bash
 # 启动所有服务（宿主机执行）
@@ -522,7 +516,7 @@ php artisan view:clear
 
 ### 数据库
 
-**PHP/Artisan 命令**在 `laravel_app` 容器内执行：
+**PHP/Artisan 命令**在 `fangcangyun_app` 容器内执行：
 ```bash
 # 运行迁移
 php artisan migrate
@@ -534,14 +528,8 @@ php artisan migrate:rollback
 php artisan make:migration create_table_name
 ```
 
-**MySQL 访问**（容器外执行）：
-```bash
-# 使用 docker compose（服务名 db）
-docker compose exec db mysql -uroot -padmin123 laravel
-
-# 或使用 docker（容器名 laravel_db）
-docker exec -it laravel_db mysql -uroot -padmin123 laravel
-```
+**数据库访问**：
+外部 MySQL 数据库，无需容器命令访问。
 
 ### Filament
 ```bash
@@ -567,7 +555,7 @@ php artisan filament:upgrade
 ## 文件组织规范
 
 ```
-laravel/
+fangcangyun/
 ├── app/
 │   ├── Admin/Resources/          # Filament 资源
 │   ├── Console/Commands/         # Artisan 命令
@@ -605,22 +593,20 @@ laravel/
 
 | 服务 | docker compose 命令 | docker 命令 |
 |------|-------------------|-------------|
-| PHP/Artisan | `docker compose exec app ...` | `docker exec laravel_app ...` |
-| MySQL | `docker compose exec db ...` | `docker exec laravel_db ...` |
-| EMQX | `docker compose exec emqx ...` | `docker exec laravel_emqx ...` |
-| Nginx | `docker compose exec web ...` | `docker exec laravel_web ...` |
+| PHP/Artisan | `docker compose exec app ...` | `docker exec fangcangyun_app ...` |
+| EMQX | `docker compose exec emqx ...` | `docker exec fangcangyun_emqx ...` |
 
 **示例**：
 ```bash
 # 两种方式等价
 docker compose exec app php artisan migrate
-docker exec laravel_app php artisan migrate
+docker exec fangcangyun_app php artisan migrate
 
 docker compose restart app
-docker restart laravel_app
+docker restart fangcangyun_app
 ```
 
-1. **Octane 缓存**：修改 PHP 文件后需要重启 `docker compose restart app`（或 `docker restart laravel_app`）
+1. **Octane 缓存**：修改 PHP 文件后需要重启 `docker compose restart app`（或 `docker restart fangcangyun_app`）
 2. **MQTT 连接**：使用 `dev_devices.code` 作为设备标识，不是 `chambers.code`
 3. **队列任务**：MQTT 命令和配置同步必须通过队列异步执行
 4. **数据库表名**：使用带模块前缀的表名（如 `chambers_chambers`）
@@ -642,6 +628,6 @@ docker restart laravel_app
 - 重试失败任务：`php artisan queue:retry all`
 
 ### Octane 问题
-- 重启 Octane：`docker compose restart app`（或 `docker restart laravel_app`）
-- 检查日志：`docker compose logs app`（或 `docker logs laravel_app`）
+- 重启 Octane：`docker compose restart app`（或 `docker restart fangcangyun_app`）
+- 检查日志：`docker compose logs app`（或 `docker logs fangcangyun_app`）
 - 清除缓存：`php artisan octane:reload`（如可用）

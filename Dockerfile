@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libcurl4-openssl-dev \
     libonig-dev \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure and install PHP extensions
@@ -27,14 +28,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files first (for better caching)
-COPY composer.json composer.lock* ./
-
-# Install PHP dependencies (skip scripts, artisan not available yet)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
-
 # Copy application code
 COPY . .
 
-# Run composer scripts now that artisan is available
-RUN composer dump-autoload --optimize
+
+
+# Create log directory
+RUN mkdir -p /var/log/supervisor /var/www/html/storage/logs
+
+# Copy supervisor configuration
+COPY supervisor/fangcangyun.conf /etc/supervisor/conf.d/fangcangyun.conf
+
+# Start supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+

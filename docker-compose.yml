@@ -10,7 +10,6 @@ services:
       - "8000:8000"
     networks:
       - fangcangyun
-    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8000 --workers=4 --task-workers=2
 
   emqx:
     image: emqx/emqx:5.8.6

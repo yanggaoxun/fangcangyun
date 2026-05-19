@@ -42,9 +42,6 @@ composer run dev
 
 # 运行测试
 php artisan test
-
-# 进入 MySQL
-docker exec -it laravel_db mysql -uroot -padmin123 laravel
 ```
 
 ## 核心功能
@@ -82,9 +79,7 @@ docker exec -it laravel_db mysql -uroot -padmin123 laravel
 ## 系统架构
 
 ### Docker 服务
-- **App**: PHP 8.2 + Laravel (端口 9000)
-- **Web**: Nginx 反向代理 (端口 8084)
-- **DB**: MySQL 8.0 (端口 3307)
+- **App**: PHP 8.2 + Laravel (端口 8000)
 - **MQTT**: EMQX Broker (端口 1883/8083/18083)
 
 ### 数据流
@@ -120,7 +115,7 @@ APP_FAKER_LOCALE=zh_CN
 ## 目录结构
 
 ```
-laravel/
+fangcangyun/
 ├── app/
 │   ├── Admin/Resources/    # Filament 资源
 │   ├── Http/Controllers/   # API 控制器

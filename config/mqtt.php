@@ -3,8 +3,8 @@
 return [
     'broker' => env('MQTT_BROKER', 'emqx'),
     'port' => env('MQTT_PORT', 1883),
-    'client_id' => env('MQTT_CLIENT_ID', 'laravel_server_'.uniqid()),
-    'username' => env('MQTT_USERNAME', 'laravel'),
+    'client_id' => env('MQTT_CLIENT_ID', 'fangcangyun_server_'.uniqid()),
+    'username' => env('MQTT_USERNAME', 'fangcangyun'),
     'password' => env('MQTT_PASSWORD', 'admin123'),
     'clean_session' => true,
     'keep_alive' => 60,
