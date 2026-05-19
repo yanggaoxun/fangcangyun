@@ -56,6 +56,11 @@ Thumbs.db
 # Build
 /build
 /dist
+/public/build
+/public/hot
+
+# Public storage symlink
+/public/storage
 
 # Local development
 /.env.local
