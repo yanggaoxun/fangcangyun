@@ -15,6 +15,16 @@ class EditChamber extends EditRecord
         return '编辑方舱';
     }
 
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return '方舱已保存';
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

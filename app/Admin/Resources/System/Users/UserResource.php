@@ -5,6 +5,8 @@ namespace App\Admin\Resources\System\Users;
 use App\Admin\Resources\System\Users\Pages\CreateUser;
 use App\Admin\Resources\System\Users\Pages\EditUser;
 use App\Admin\Resources\System\Users\Pages\ListUsers;
+use App\Models\ChamberBase;
+use App\Models\SysRole;
 use App\Models\SysUser;
 use BackedEnum;
 use Filament\Forms;
@@ -58,7 +60,6 @@ class UserResource extends Resource
                 Forms\Components\Select::make('roles')
                     ->label('角色')
                     ->relationship('roles', 'label')
-                    ->multiple()
                     ->preload()
                     ->required()
                     ->options(function () use ($currentUser) {
@@ -80,8 +81,18 @@ class UserResource extends Resource
                     ->options(ChamberBase::pluck('name', 'id'))
                     ->searchable()
                     ->visible(function ($get) {
-                        $roleIds = $get('roles') ?? [];
-                        if (empty($roleIds)) {
+                        $roleIds = $get('roles');
+                        // 处理单选（创建时）或多选/关系加载（编辑时）的情况
+                        if (is_array($roleIds)) {
+                            if (empty($roleIds)) {
+                                return false;
+                            }
+                            $roleId = $roleIds[0] ?? null;
+                        } else {
+                            $roleId = $roleIds;
+                        }
+
+                        if (! $roleId) {
                             return false;
                         }
 
@@ -90,11 +101,21 @@ class UserResource extends Resource
                             return false;
                         }
 
-                        return in_array($baseAdminRole->id, $roleIds);
+                        return $roleId == $baseAdminRole->id;
                     })
                     ->required(function ($get) {
-                        $roleIds = $get('roles') ?? [];
-                        if (empty($roleIds)) {
+                        $roleIds = $get('roles');
+                        // 处理单选（创建时）或多选/关系加载（编辑时）的情况
+                        if (is_array($roleIds)) {
+                            if (empty($roleIds)) {
+                                return false;
+                            }
+                            $roleId = $roleIds[0] ?? null;
+                        } else {
+                            $roleId = $roleIds;
+                        }
+
+                        if (! $roleId) {
                             return false;
                         }
 
@@ -103,7 +124,7 @@ class UserResource extends Resource
                             return false;
                         }
 
-                        return in_array($baseAdminRole->id, $roleIds);
+                        return $roleId == $baseAdminRole->id;
                     }),
             ]);
     }

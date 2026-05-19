@@ -5,6 +5,7 @@ namespace App\Admin\Resources\System\Users;
 use App\Admin\Resources\System\Users\Pages\CreateRole;
 use App\Admin\Resources\System\Users\Pages\EditRole;
 use App\Admin\Resources\System\Users\Pages\ListRoles;
+use App\Models\SysPermission;
 use App\Models\SysRole;
 use BackedEnum;
 use Filament\Forms;

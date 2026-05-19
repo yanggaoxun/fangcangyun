@@ -122,7 +122,7 @@ class ChamberResource extends Resource
                 ->url(static::getUrl())
                 ->sort(2)
                 ->group('方舱管理')
-                ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.chambers.chambers')),
+                ->isActiveWhen(fn () => request()->is('admin/chambers*') && ! request()->is('admin/chambers/bases*') && ! request()->is('admin/chambers/monitor*')),
             \Filament\Navigation\NavigationItem::make('方舱监控')
                 ->icon('heroicon-o-chart-bar')
                 ->url(static::getUrl('monitor'))

@@ -24,6 +24,8 @@ class BaseResource extends Resource
 {
     protected static ?string $model = ChamberBase::class;
 
+    protected static ?string $modelLabel = '基地';
+
     protected static ?string $navigationLabel = '基地管理';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHome;

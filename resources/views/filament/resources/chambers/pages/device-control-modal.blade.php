@@ -7,7 +7,7 @@
 
     @if($chamber)
         {{-- 头部信息栏 --}}
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; color: white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
+        <div style="background: #000000; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; color: white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="background: rgba(255,255,255,0.25); border-radius: 8px; padding: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
@@ -46,7 +46,7 @@
                 <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0;">📊 实时环境数据</h4>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                 {{-- 温度 --}}
                 <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 14px; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);">
                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
@@ -73,15 +73,6 @@
                     </div>
                     <div style="font-size: 24px; font-weight: 700; color: #065f46; line-height: 1;">{{ number_format($latestData->co2_level, 0) }}<span style="font-size: 13px; font-weight: 500; margin-left: 2px;">ppm</span></div>
                 </div>
-
-                {{-- 光照强度 --}}
-                <div style="background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%); border-radius: 10px; padding: 14px; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);">
-                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                        <span style="font-size: 16px;">☀️</span>
-                        <span style="font-size: 11px; color: #854d0e; font-weight: 600;">光照</span>
-                    </div>
-                    <div style="font-size: 24px; font-weight: 700; color: #854d0e; line-height: 1;">{{ number_format($latestData->light_intensity, 0) }}<span style="font-size: 13px; font-weight: 500; margin-left: 2px;">lux</span></div>
-                </div>
             </div>
         </div>
 
@@ -92,14 +83,13 @@
                 <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0;">🔌 设备开关控制</h4>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                 @php
                     $devices = [
                         ['key' => 'inner_circulation', 'icon' => '🔄', 'name' => $deviceNames['inner_circulation'] ?? '内循环'],
                         ['key' => 'cooling', 'icon' => '❄️', 'name' => $deviceNames['cooling'] ?? '制冷'],
                         ['key' => 'heating', 'icon' => '🔥', 'name' => $deviceNames['heating'] ?? '制热'],
                         ['key' => 'fan', 'icon' => '💨', 'name' => $deviceNames['fan'] ?? '风机'],
-                        ['key' => 'four_way_valve', 'icon' => '🔧', 'name' => $deviceNames['four_way_valve'] ?? '四通阀'],
                         ['key' => 'fresh_air', 'icon' => '🌬️', 'name' => $deviceNames['fresh_air'] ?? '新风'],
                         ['key' => 'humidification', 'icon' => '💧', 'name' => $deviceNames['humidification'] ?? '加湿'],
                         ['key' => 'lighting_supplement', 'icon' => '💡', 'name' => $deviceNames['lighting_supplement'] ?? '补光'],
