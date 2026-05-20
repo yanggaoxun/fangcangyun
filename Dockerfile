@@ -1,5 +1,9 @@
 FROM php:8.2.29-fpm
 
+# 设置容器时区为东八区（中国时区）
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
 #阿里云服务器如果慢就用这个源
 #RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
 #    sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources
