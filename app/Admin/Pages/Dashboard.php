@@ -16,8 +16,8 @@ class Dashboard extends BaseDashboard
         return '仪表板';
     }
 
-    public static function getNavigationIcon(): string
+    public static function shouldRegisterNavigation(): bool
     {
-        return 'heroicon-o-presentation-chart-line';
+        return false;
     }
 }

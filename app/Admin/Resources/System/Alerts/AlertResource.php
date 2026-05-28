@@ -19,7 +19,7 @@ class AlertResource extends Resource
 
     protected static ?string $navigationLabel = '报警管理';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBellAlert;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSignal;
 
     public static function getNavigationGroup(): ?string
     {

@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Admin\Pages\Auth\Login;
+use App\Admin\Pages\Dashboard;
 use App\Admin\Pages\Profile;
 use App\Admin\Resources\System\Users\PermissionResource;
 use App\Admin\Resources\System\Users\RoleResource;
@@ -11,7 +13,6 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -30,10 +31,13 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
+            ->darkMode(false)
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('12rem')
             ->navigationGroups([
                 '方舱管理',
                 '菌菇管理',
@@ -72,6 +76,10 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-user')
                     ->url(fn () => Profile::getUrl()),
             ])
+            ->renderHook(
+                'panels::topbar.logo.after',
+                fn () => view('filament.components.dashboard-top-nav'),
+            )
             ->assets([
                 \Filament\Support\Assets\Css::make('custom', __DIR__.'/../../../resources/css/filament/admin/custom.css'),
             ]);

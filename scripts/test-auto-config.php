@@ -4,7 +4,7 @@ require __DIR__.'/../vendor/autoload.php';
 
 use App\Services\MqttPublisher;
 
-if (!isset($argv[1])) {
+if (! isset($argv[1])) {
     echo "错误: 必须提供设备编码\n";
     echo "用法: php test-auto-config.php <设备编码>\n";
     echo "示例: php test-auto-config.php CH003\n";

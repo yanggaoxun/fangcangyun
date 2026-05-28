@@ -81,6 +81,7 @@ class AutoControl:
         self.sensor_data = None
         self.current_time = datetime.now()
         self.inner_circulation_requests = {}  # 内循环引用计数
+        self.inner_circulation_delayed_stop = {}  # 内循环延时关闭时间 {control_type: timestamp}
         self.last_stop_time = {  # 压缩机停止时间记录
             'cooling': 0,
             'heating': 0
@@ -136,12 +137,13 @@ class AutoControl:
     
     def _request_inner_circulation(self, control_type, main_device_state, control_config):
         """
-        请求内循环（OR逻辑 + 引用计数）
+        请求内循环（OR逻辑 + 引用计数 + 延时关闭）
         
         逻辑：
         - 记录各控制类型是否需要内循环
         - 只要有任何一个控制类型需要，内循环就开启
-        - 所有控制类型都不需要时，才关闭内循环
+        - 所有控制类型都不需要时，开始延时关闭倒计时
+        - 延时关闭期间如有新请求，立即重新开启
         
         Args:
             control_type: 控制类型
@@ -167,17 +169,46 @@ class AutoControl:
         # 记录该控制类型的请求状态
         self.inner_circulation_requests[control_type] = need_inner
         
+        # 获取延时关闭配置（秒）
+        delay_seconds = control_config.get('delay_stop_cycle', 0)
+        
+        # 如果该控制类型不再需要内循环，设置延时关闭时间
+        if not need_inner and delay_seconds > 0:
+            # 记录延时关闭时间点
+            self.inner_circulation_delayed_stop[control_type] = time.time() + delay_seconds
+            logger.debug(f"【内循环延时】{control_type} 请求关闭，将在 {delay_seconds} 秒后关闭")
+        elif need_inner:
+            # 如果需要内循环，取消该控制类型的延时关闭
+            if control_type in self.inner_circulation_delayed_stop:
+                del self.inner_circulation_delayed_stop[control_type]
+        
         # OR逻辑：只要有任何一个控制类型需要，就开启
         any_need = any(self.inner_circulation_requests.values())
         current_state = self.controller.get_state('inner_circulation')
         
         if any_need and not current_state:
+            # 有控制类型需要，立即开启
             requesters = [k for k, v in self.inner_circulation_requests.items() if v]
             logger.info(f"【内循环】开启 (请求者: {requesters})")
             self.controller.set_state('inner_circulation', True)
         elif not any_need and current_state:
-            logger.info("【内循环】关闭 (无控制类型需要)")
-            self.controller.set_state('inner_circulation', False)
+            # 所有控制类型都不需要，检查是否有未过期的延时关闭
+            now = time.time()
+            active_delays = {
+                k: v for k, v in self.inner_circulation_delayed_stop.items()
+                if v > now
+            }
+            
+            if active_delays:
+                # 有延时关闭未过期，保持开启
+                remaining = {k: int(v - now) for k, v in active_delays.items()}
+                logger.info(f"【内循环】保持开启 (延时关闭中: {remaining})")
+            else:
+                # 所有延时关闭都已过期，关闭内循环
+                logger.info("【内循环】关闭 (无控制类型需要且延时已到期)")
+                self.controller.set_state('inner_circulation', False)
+                # 清空已过期的延时记录
+                self.inner_circulation_delayed_stop.clear()
 
     def _load_last_mode(self):
         """加载上次温度控制模式"""

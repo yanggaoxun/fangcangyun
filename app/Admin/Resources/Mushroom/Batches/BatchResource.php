@@ -22,7 +22,7 @@ class BatchResource extends Resource
 
     protected static ?string $navigationLabel = '种植批次';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBarSquare;
 
     public static function getNavigationGroup(): ?string
     {

@@ -38,7 +38,7 @@ class MqttPublisher
     /**
      * 发布手动控制命令
      *
-     * @param string $deviceCode 设备编码 (dev_devices.code)
+     * @param  string  $deviceCode  设备编码 (dev_devices.code)
      */
     public static function publishManualControl(string $deviceCode, array $actions, ?int $overrideMinutes = null): string
     {
@@ -62,7 +62,7 @@ class MqttPublisher
     /**
      * 发布自动控制配置
      *
-     * @param string $deviceCode 设备编码 (dev_devices.code)
+     * @param  string  $deviceCode  设备编码 (dev_devices.code)
      */
     public static function publishAutoConfig(string $deviceCode, string $controlType, array $config): string
     {
@@ -83,7 +83,7 @@ class MqttPublisher
     /**
      * 发布完整配置
      *
-     * @param string $deviceCode 设备编码 (dev_devices.code)
+     * @param  string  $deviceCode  设备编码 (dev_devices.code)
      */
     public static function publishFullConfig(string $deviceCode, array $configs): string
     {

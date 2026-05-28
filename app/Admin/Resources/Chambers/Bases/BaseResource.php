@@ -28,7 +28,7 @@ class BaseResource extends Resource
 
     protected static ?string $navigationLabel = '基地管理';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHome;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
     public static function form(Schema $schema): Schema
     {

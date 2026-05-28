@@ -16,7 +16,7 @@ use PhpMqtt\Client\ConnectionSettings;
 use PhpMqtt\Client\MqttClient;
 
 // 配置
-if (!isset($argv[1])) {
+if (! isset($argv[1])) {
     echo "错误: 必须提供设备编码\n";
     echo "用法: php simulate-device.php <设备编码> [broker地址]\n";
     echo "示例: php simulate-device.php CH001\n";

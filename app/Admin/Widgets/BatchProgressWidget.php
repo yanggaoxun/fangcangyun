@@ -23,13 +23,19 @@ class BatchProgressWidget extends BaseWidget
                     ->with(['chamber', 'strain'])
                     ->whereNull('actual_harvest_date')
                     ->orderBy('inoculation_date', 'desc')
-                    ->limit(5)
+                    ->limit(6)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('code')
-                    ->label('批次号'),
+                    ->label('批次号')
+                    ->weight('font-semibold')
+                    ->color('primary'),
+
                 Tables\Columns\TextColumn::make('chamber.name')
-                    ->label('方舱'),
+                    ->label('方舱')
+                    ->icon('heroicon-m-home')
+                    ->iconColor('gray'),
+
                 Tables\Columns\TextColumn::make('strain.type')
                     ->label('菌种')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -37,14 +43,27 @@ class BatchProgressWidget extends BaseWidget
                         'shiitake' => '香菇',
                         'enoki' => '金针菇',
                         'other' => '其他',
-                    }),
+                        default => $state,
+                    })
+                    ->badge(),
+
                 Tables\Columns\TextColumn::make('inoculation_date')
                     ->label('接种日期')
-                    ->dateTime('Y年 n月j日'),
+                    ->dateTime('m-d')
+                    ->color('gray'),
+
                 Tables\Columns\TextColumn::make('expected_harvest_date')
                     ->label('预计收获')
-                    ->dateTime('Y年 n月j日'),
+                    ->dateTime('m-d')
+                    ->color('gray'),
+
+                Tables\Columns\TextColumn::make('daysSinceInoculation')
+                    ->label('已种植')
+                    ->formatStateUsing(fn ($state) => $state.' 天')
+                    ->color('success')
+                    ->size('sm'),
             ])
-            ->paginated(false);
+            ->paginated(false)
+            ->striped();
     }
 }

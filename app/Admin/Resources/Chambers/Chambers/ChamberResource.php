@@ -25,7 +25,7 @@ class ChamberResource extends Resource
 
     protected static ?string $navigationLabel = '方舱管理';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
     protected static string|UnitEnum|null $navigationGroup = '方舱管理';
 

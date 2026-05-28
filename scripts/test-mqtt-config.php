@@ -11,7 +11,7 @@
 
 require __DIR__.'/../vendor/autoload.php';
 
-if (!isset($argv[1])) {
+if (! isset($argv[1])) {
     echo "错误: 必须提供设备编码\n";
     echo "用法: php test-mqtt-config.php <设备编码> [auto|manual]\n";
     echo "示例: php test-mqtt-config.php CH003\n";

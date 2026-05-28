@@ -1,28 +1,457 @@
-.fi-wi-stats-overview {
-    .grid > div {
-        &:nth-child(1) {
-            background-color: #f0fdf4 !important;
-            border-left: 4px solid #22c55e !important;
-        }
-        &:nth-child(2) {
-            background-color: #eff6ff !important;
-            border-left: 4px solid #3b82f6 !important;
-        }
-        &:nth-child(3) {
-            background-color: #ecfeff !important;
-            border-left: 4px solid #06b6d4 !important;
-        }
-        &:nth-child(4) {
-            background-color: #eef2ff !important;
-            border-left: 4px solid #6366f1 !important;
-        }
-        &:nth-child(5) {
-            background-color: #fffbeb !important;
-            border-left: 4px solid #f59e0b !important;
-        }
-        &:nth-child(6) {
-            background-color: #fff1f2 !important;
-            border-left: 4px solid #f43f5e !important;
-        }
+/**
+ * AI科技风后台主题样式
+ * 深色科技风 - 仅侧边栏和顶部栏
+ */
+
+/* ===== 基础变量 ===== */
+:root {
+    --tech-bg-sidebar: #0a192f;
+    --tech-green: #4ade80;
+    --tech-green-dim: rgba(74, 222, 128, 0.15);
+    --tech-green-glow: rgba(74, 222, 128, 0.3);
+    --tech-border: rgba(74, 222, 128, 0.15);
+    --tech-text-primary: #e2e8f0;
+    --tech-text-secondary: #94a3b8;
+    --tech-text-muted: #64748b;
+}
+
+/* ===== 侧边栏样式 - 深色科技风 ===== */
+.fi-sidebar {
+    background-color: var(--tech-bg-sidebar) !important;
+    border-right: 1px solid var(--tech-border) !important;
+}
+
+/* 侧边栏头部 */
+.fi-sidebar-header {
+    border-bottom: 1px solid var(--tech-border) !important;
+    padding: 1.25rem !important;
+}
+
+/* Logo样式 */
+.fi-sidebar-header a,
+.fi-sidebar-header .fi-logo {
+    color: var(--tech-green) !important;
+}
+
+/* 导航区域 */
+.fi-sidebar-nav {
+    padding: 0.5rem 0.5rem 0.5rem 1rem !important;
+}
+
+/* 分组列表容器 */
+.fi-sidebar-nav-groups {
+    gap: 0 !important;
+}
+
+/* ===== 导航分组 ===== */
+.fi-sidebar-group {
+    margin-bottom: 0.25rem !important;
+}
+
+/* 分组按钮 */
+.fi-sidebar-group-btn {
+    color: var(--tech-green) !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    padding: 0.75rem 1rem 0.5rem !important;
+    text-align: left !important;
+}
+
+.fi-sidebar-group-btn:hover {
+    color: #ffffff !important;
+}
+
+/* 分组标签 */
+.fi-sidebar-group-label {
+    color: inherit !important;
+}
+
+/* 分组项目列表 */
+.fi-sidebar-group-items {
+    padding: 0 !important;
+}
+
+/* ===== 导航菜单项 ===== */
+.fi-sidebar-item {
+    margin: 0.125rem 0 !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-sidebar-item-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    color: #ffffff !important;
+    font-size: 0.8125rem !important;
+    padding: 0.375rem 0.5rem !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+}
+
+.fi-sidebar-item-btn .fi-sidebar-item-label {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item-btn:hover {
+    background: var(--tech-green-dim) !important;
+    color: var(--tech-text-primary) !important;
+}
+
+.fi-sidebar-item-btn:hover .fi-sidebar-item-icon {
+    color: var(--tech-green) !important;
+}
+
+/* Active状态hover保持 */
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn:hover {
+    background: var(--tech-green-dim) !important;
+    color: var(--tech-green) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn:hover .fi-sidebar-item-label {
+    color: var(--tech-green) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn:hover .fi-sidebar-item-icon {
+    color: var(--tech-green) !important;
+}
+
+/* 导航图标 */
+.fi-sidebar-item-icon {
+    width: 1rem !important;
+    height: 1rem !important;
+    color: #94a3b8 !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 导航文字 */
+.fi-sidebar-item-label {
+    transition: all 0.3s ease !important;
+}
+
+/* Active状态 - 发光效果 */
+.fi-sidebar-item.fi-active {
+    background: transparent !important;
+    position: relative !important;
+}
+
+.fi-sidebar-item.fi-active::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 3px !important;
+    height: 50% !important;
+    background: var(--tech-green) !important;
+    border-radius: 0 3px 3px 0 !important;
+    box-shadow: 0 0 8px var(--tech-green-glow) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+    background: var(--tech-green-dim) !important;
+    color: var(--tech-green) !important;
+    font-weight: 600 !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn .fi-sidebar-item-label {
+    color: var(--tech-green) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: var(--tech-green) !important;
+}
+
+/* 分组Active状态 */
+.fi-sidebar-group.fi-active {
+    background: transparent !important;
+}
+
+.fi-sidebar-group.fi-active .fi-sidebar-group-btn {
+    color: var(--tech-green) !important;
+}
+
+/* 折叠按钮 */
+.fi-sidebar-group-collapse-btn {
+    color: #f1f5f9 !important;
+}
+
+.fi-sidebar-group-collapse-btn:hover {
+    color: var(--tech-green) !important;
+}
+
+/* ===== 顶部栏样式 - 深色科技风 ===== */
+.fi-topbar {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid var(--tech-border) !important;
+}
+
+.fi-topbar-start {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+/* Logo区域 */
+.fi-topbar-start .fi-logo {
+    color: var(--tech-green) !important;
+}
+
+/* 顶部栏按钮 */
+.fi-topbar button[class*="icon-button"] {
+    color: var(--tech-text-secondary) !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-topbar button[class*="icon-button"]:hover {
+    color: var(--tech-green) !important;
+    background: var(--tech-green-dim) !important;
+}
+
+/* ===== 滚动条 ===== */
+.fi-sidebar::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.fi-sidebar::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tech-border) !important;
+    border-radius: 4px !important;
+}
+
+/* ===== 顶部仪表板导航按钮 ===== */
+.dashboard-top-nav {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.375rem 0.75rem !important;
+    color: #f1f5f9 !important;
+    background: transparent !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    margin-left: 0.5rem !important;
+    border: 1px solid transparent !important;
+}
+
+.dashboard-top-nav:hover {
+    color: var(--tech-text-primary) !important;
+    background: var(--tech-green-dim) !important;
+    border-color: var(--tech-border) !important;
+}
+
+.dashboard-top-nav svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    color: #94a3b8 !important;
+    transition: all 0.3s ease !important;
+    flex-shrink: 0 !important;
+}
+
+.dashboard-top-nav:hover svg {
+    color: var(--tech-green) !important;
+}
+
+/* Active状态 */
+.dashboard-top-nav.active {
+    color: var(--tech-green) !important;
+    background: var(--tech-green-dim) !important;
+    border-color: var(--tech-border) !important;
+    font-weight: 600 !important;
+}
+
+.dashboard-top-nav.active svg {
+    color: var(--tech-green) !important;
+}
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 1024px) {
+    .fi-sidebar {
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5) !important;
+    }
+}
+
+/* ===== 仪表板统计卡片样式 ===== */
+.dashboard-stat-card {
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.2s ease !important;
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.dashboard-stat-green {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%) !important;
+    border-left: 4px solid #10b981 !important;
+}
+
+.dashboard-stat-green .fi-wi-stats-overview-stat-value {
+    color: #059669 !important;
+}
+
+.dashboard-stat-blue {
+    background: linear-gradient(135deg, #eff6ff 0%, #eff6ff 100%) !important;
+    border-left: 4px solid #3b82f6 !important;
+}
+
+.dashboard-stat-blue .fi-wi-stats-overview-stat-value {
+    color: #2563eb !important;
+}
+
+.dashboard-stat-indigo {
+    background: linear-gradient(135deg, #eef2ff 0%, #eef2ff 100%) !important;
+    border-left: 4px solid #6366f1 !important;
+}
+
+.dashboard-stat-indigo .fi-wi-stats-overview-stat-value {
+    color: #4f46e5 !important;
+}
+
+.dashboard-stat-amber {
+    background: linear-gradient(135deg, #fffbeb 0%, #fffbeb 100%) !important;
+    border-left: 4px solid #f59e0b !important;
+}
+
+.dashboard-stat-amber .fi-wi-stats-overview-stat-value {
+    color: #d97706 !important;
+}
+
+/* ===== 快速操作按钮样式 ===== */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.quick-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.quick-action-icon svg {
+    width: 24px !important;
+    height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    flex-shrink: 0;
+    display: block;
+}
+
+.quick-action-primary .quick-action-icon {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.quick-action-success .quick-action-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+}
+
+.quick-action-info .quick-action-icon {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.quick-action-warning .quick-action-icon {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.quick-action-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* ===== 图表容器优化 ===== */
+.fi-wi-chart {
+    min-height: 220px !important;
+    max-height: 260px !important;
+}
+
+.fi-wi-chart canvas {
+    max-height: 240px !important;
+}
+
+/* ===== 表格优化 ===== */
+.fi-ta-table {
+    border-radius: 8px;
+}
+
+.fi-ta-row:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ===== Widget卡片增强 ===== */
+.fi-wi-widget {
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    transition: box-shadow 0.2s ease;
+}
+
+.fi-wi-widget:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ===== 响应式调整 ===== */
+@media (max-width: 768px) {
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fi-wi-stats-overview {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fi-wi-stats-overview {
+        grid-template-columns: 1fr !important;
     }
 }

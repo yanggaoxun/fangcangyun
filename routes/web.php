@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check()
+        ? redirect('/admin')
+        : redirect('/admin/login');
 });
 
 // 兼容生产环境的logout GET请求
